@@ -4,20 +4,64 @@
   <meta charset="UTF-8">
   <title>Suri Cosméticos</title>
   <style>
-    body { font-family: Arial, sans-serif; background-color: #ffe4ec; margin:0; padding:0; }
-    header { background:#ff66a3; color:white; padding:15px; text-align:center; font-size:24px; font-weight:bold; }
-    nav { display:flex; justify-content:center; background:#ff99bb; padding:10px; }
-    nav button { margin:0 10px; padding:10px 20px; border:none; background:white; color:#ff3399; font-weight:bold; border-radius:5px; cursor:pointer; }
-    nav button:hover { background:#ffe6f0; }
-    section { display:none; padding:20px; }
-    section.active { display:block; }
-    form input, form textarea, form select { display:block; margin:10px 0; padding:8px; width:100%; max-width:400px; }
-    form button { background:#ff3399; color:white; border:none; padding:10px 20px; cursor:pointer; border-radius:5px; }
-    table { width:100%; max-width:900px; border-collapse:collapse; margin-top:20px; }
-    table, th, td { border:1px solid #ff99bb; }
-    th, td { padding:10px; text-align:left; }
-    .btn-editar { background:#ff66a3; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:4px; }
-    .totalBox { margin-top:15px; font-weight:bold; font-size:18px; color:#b30059; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #ffe6f0;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #ff99cc;
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      background: #ffb3d9;
+      padding: 10px;
+    }
+    nav button {
+      margin: 0 10px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      background: #ff66b2;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    nav button:hover {
+      background: #e60073;
+    }
+    section {
+      display: none;
+      padding: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+    }
+    .total-vendas {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #b30059;
+    }
+    .filtro {
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -29,20 +73,20 @@
   </nav>
 
   <!-- Produtos -->
-  <section id="produtos" class="active">
-    <h2>Cadastro de Produtos</h2>
-    <form id="formProduto">
-      <input type="text" id="nomeProduto" placeholder="Nome do produto" required>
-      <textarea id="descricaoProduto" placeholder="Descrição"></textarea>
-      <input type="number" id="precoProduto" placeholder="Preço" required>
-      <input type="number" id="estoqueProduto" placeholder="Estoque" required>
-      <input type="text" id="marcaProduto" placeholder="Marca">
-      <button type="button" onclick="salvarProduto()">Salvar Produto</button>
-    </form>
-    <h3>Lista de Produtos</h3>
+  <section id="produtos">
+    <h2>Cadastro de Produto</h2>
+    <input id="nomeProduto" placeholder="Nome"><br><br>
+    <input id="descricaoProduto" placeholder="Descrição"><br><br>
+    <input id="marcaProduto" placeholder="Marca"><br><br>
+    <input id="precoProduto" type="number" step="0.01" placeholder="Preço"><br><br>
+    <input id="estoqueProduto" type="number" placeholder="Estoque"><br><br>
+    <button onclick="salvarProduto()">Salvar Produto</button>
+    <h3>Produtos Cadastrados</h3>
     <table>
       <thead>
-        <tr><th>Nome</th><th>Descrição</th><th>Preço</th><th>Estoque</th><th>Marca</th><th>Entrada</th><th>Ações</th></tr>
+        <tr>
+          <th>Nome</th><th>Descrição</th><th>Marca</th><th>Preço</th><th>Estoque</th><th>Entrada</th><th>Ação</th>
+        </tr>
       </thead>
       <tbody id="listaProdutos"></tbody>
     </table>
@@ -50,17 +94,14 @@
 
   <!-- Clientes -->
   <section id="clientes">
-    <h2>Cadastro de Clientes</h2>
-    <form id="formCliente">
-      <input type="text" id="nomeCliente" placeholder="Nome do cliente" required>
-      <input type="tel" id="telefoneCliente" placeholder="Telefone">
-      <input type="email" id="emailCliente" placeholder="E-mail">
-      <button type="button" onclick="salvarCliente()">Salvar Cliente</button>
-    </form>
-    <h3>Lista de Clientes</h3>
+    <h2>Cadastro de Cliente</h2>
+    <input id="nomeCliente" placeholder="Nome"><br><br>
+    <input id="telefoneCliente" placeholder="Telefone"><br><br>
+    <button onclick="salvarCliente()">Salvar Cliente</button>
+    <h3>Clientes Cadastrados</h3>
     <table>
       <thead>
-        <tr><th>Nome</th><th>Telefone</th><th>Email</th><th>Ações</th></tr>
+        <tr><th>Nome</th><th>Telefone</th><th>Ação</th></tr>
       </thead>
       <tbody id="listaClientes"></tbody>
     </table>
@@ -68,31 +109,42 @@
 
   <!-- Vendas -->
   <section id="vendas">
-    <h2>Simulação de Vendas</h2>
-    <form id="formVenda">
-      <select id="selectCliente" required></select>
-      <select id="selectProduto" required></select>
-      <input type="number" id="quantidadeVenda" placeholder="Quantidade" required>
-      <button type="button" onclick="registrarVenda()">Registrar Venda</button>
-    </form>
+    <h2>Registrar Venda</h2>
+    <select id="selectCliente"></select><br><br>
+    <select id="selectProduto"></select><br><br>
+    <input id="quantidadeVenda" type="number" placeholder="Quantidade"><br><br>
+    <button onclick="registrarVenda()">Registrar</button>
+
+    <div class="filtro">
+      <label>Filtrar por cliente:</label>
+      <select id="filtroCliente" onchange="listarVendas()"></select>
+    </div>
+
     <h3>Histórico de Vendas</h3>
     <table>
       <thead>
-        <tr><th>Data</th><th>Cliente</th><th>Produto</th><th>Qtd</th><th>Preço Unitário</th><th>Total</th></tr>
+        <tr>
+          <th>Data</th><th>Cliente</th><th>Produto</th><th>Qtd</th><th>Preço</th><th>Total</th><th>Ação</th>
+        </tr>
       </thead>
       <tbody id="listaVendas"></tbody>
     </table>
-    <div id="totalVendas" class="totalBox"></div>
+    <div class="total-vendas" id="totalVendas"></div>
   </section>
 
   <script>
     let editarProdutoIndex = null;
     let editarClienteIndex = null;
 
-    function mostrarAba(aba) {
-      document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-      document.getElementById(aba).classList.add('active');
-      atualizarSelects();
+    function mostrarAba(id) {
+      document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+      document.getElementById(id).style.display = 'block';
+      if(id === 'produtos') listarProdutos();
+      if(id === 'clientes') listarClientes();
+      if(id === 'vendas') {
+        listarVendas();
+        atualizarSelects();
+      }
     }
 
     // Produtos
@@ -102,96 +154,83 @@
       const preco = parseFloat(document.getElementById('precoProduto').value) || 0;
       const estoque = parseInt(document.getElementById('estoqueProduto').value) || 0;
       const marca = document.getElementById('marcaProduto').value;
+      const entrada = new Date().toLocaleString();
 
-      if(!nome || preco <= 0) { alert('Preencha pelo menos o nome e um preço válido!'); return; }
+      if(!nome || preco <= 0) { alert('Preencha pelo menos nome e preço válido'); return; }
 
       let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-      const dataAgora = new Date().toLocaleDateString('pt-BR');
-
       if(editarProdutoIndex !== null) {
         produtos[editarProdutoIndex] = {...produtos[editarProdutoIndex], nome, descricao, preco, estoque, marca};
         editarProdutoIndex = null;
       } else {
-        produtos.push({nome, descricao, preco, estoque, marca, dataEntrada: dataAgora});
+        produtos.push({nome, descricao, preco, estoque, marca, entrada});
       }
       localStorage.setItem('produtos', JSON.stringify(produtos));
-      document.getElementById('formProduto').reset();
+      limparProduto();
       listarProdutos();
-      atualizarSelects();
     }
-
     function listarProdutos() {
       let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-      let lista = document.getElementById('listaProdutos');
-      lista.innerHTML = '';
-      produtos.forEach((p, i) => {
-        lista.innerHTML += `<tr>
-          <td>${p.nome}</td>
-          <td>${p.descricao}</td>
-          <td>R$ ${p.preco.toFixed(2)}</td>
-          <td>${p.estoque}</td>
-          <td>${p.marca}</td>
-          <td>${p.dataEntrada || "-"}</td>
-          <td><button class="btn-editar" onclick="editarProduto(${i})">Alterar</button></td>
-        </tr>`;
-      });
+      document.getElementById('listaProdutos').innerHTML = produtos.map((p,i)=>`
+        <tr>
+          <td>${p.nome}</td><td>${p.descricao||''}</td><td>${p.marca||''}</td>
+          <td>R$ ${p.preco.toFixed(2)}</td><td>${p.estoque}</td><td>${p.entrada||''}</td>
+          <td><button onclick="editarProduto(${i})">Alterar</button></td>
+        </tr>
+      `).join('');
     }
-
-    function editarProduto(i) {
-      let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-      let p = produtos[i];
+    function editarProduto(i){
+      let p = JSON.parse(localStorage.getItem('produtos'))[i];
       document.getElementById('nomeProduto').value = p.nome;
       document.getElementById('descricaoProduto').value = p.descricao;
+      document.getElementById('marcaProduto').value = p.marca;
       document.getElementById('precoProduto').value = p.preco;
       document.getElementById('estoqueProduto').value = p.estoque;
-      document.getElementById('marcaProduto').value = p.marca;
       editarProdutoIndex = i;
-      mostrarAba('produtos');
+    }
+    function limparProduto(){
+      document.getElementById('nomeProduto').value='';
+      document.getElementById('descricaoProduto').value='';
+      document.getElementById('marcaProduto').value='';
+      document.getElementById('precoProduto').value='';
+      document.getElementById('estoqueProduto').value='';
     }
 
     // Clientes
     function salvarCliente() {
       const nome = document.getElementById('nomeCliente').value;
       const telefone = document.getElementById('telefoneCliente').value;
-      const email = document.getElementById('emailCliente').value;
-
-      if(!nome) { alert('Preencha pelo menos o nome do cliente!'); return; }
+      if(!nome) { alert('Informe o nome do cliente'); return; }
 
       let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-      if(editarClienteIndex !== null) {
-        clientes[editarClienteIndex] = {nome, telefone, email};
-        editarClienteIndex = null;
+      if(editarClienteIndex !== null){
+        clientes[editarClienteIndex] = {nome, telefone};
+        editarClienteIndex=null;
       } else {
-        clientes.push({nome, telefone, email});
+        clientes.push({nome, telefone});
       }
       localStorage.setItem('clientes', JSON.stringify(clientes));
-      document.getElementById('formCliente').reset();
+      limparCliente();
       listarClientes();
-      atualizarSelects();
     }
-
     function listarClientes() {
       let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-      let lista = document.getElementById('listaClientes');
-      lista.innerHTML = '';
-      clientes.forEach((c, i) => {
-        lista.innerHTML += `<tr>
-          <td>${c.nome}</td>
-          <td>${c.telefone}</td>
-          <td>${c.email}</td>
-          <td><button class="btn-editar" onclick="editarCliente(${i})">Alterar</button></td>
-        </tr>`;
-      });
+      document.getElementById('listaClientes').innerHTML = clientes.map((c,i)=>`
+        <tr>
+          <td>${c.nome}</td><td>${c.telefone}</td>
+          <td><button onclick="editarCliente(${i})">Alterar</button></td>
+        </tr>
+      `).join('');
     }
-
-    function editarCliente(i) {
-      let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-      let c = clientes[i];
+    function editarCliente(i){
+      let c = JSON.parse(localStorage.getItem('clientes'))[i];
       document.getElementById('nomeCliente').value = c.nome;
       document.getElementById('telefoneCliente').value = c.telefone;
-      document.getElementById('emailCliente').value = c.email;
-      editarClienteIndex = i;
-      mostrarAba('clientes');
+      editarClienteIndex=i;
+    }
+    function limparCliente(){
+      document.getElementById('nomeCliente').value='';
+      document.getElementById('telefoneCliente').value='';
     }
 
     // Vendas
@@ -199,78 +238,76 @@
       const clienteIndex = document.getElementById('selectCliente').value;
       const produtoIndex = document.getElementById('selectProduto').value;
       const quantidade = parseInt(document.getElementById('quantidadeVenda').value);
-
-      if(clienteIndex === "" || produtoIndex === "" || !quantidade || quantidade <= 0) {
-        alert('Preencha todos os campos corretamente!');
-        return;
+      if(clienteIndex==="" || produtoIndex==="" || !quantidade || quantidade<=0){
+        alert('Preencha todos os campos corretamente'); return;
       }
 
-      let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-      let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-
-      if(quantidade > produtos[produtoIndex].estoque) {
-        alert('Quantidade maior que o estoque disponível!');
-        return;
+      let produtos = JSON.parse(localStorage.getItem('produtos'))||[];
+      let clientes = JSON.parse(localStorage.getItem('clientes'))||[];
+      if(quantidade>produtos[produtoIndex].estoque){
+        alert('Quantidade maior que o estoque disponível'); return;
       }
 
-      let vendas = JSON.parse(localStorage.getItem('vendas')) || [];
-      const dataVenda = new Date().toLocaleString('pt-BR');
+      let vendas = JSON.parse(localStorage.getItem('vendas'))||[];
       const venda = {
+        data: new Date().toLocaleString(),
         cliente: clientes[clienteIndex].nome,
         produto: produtos[produtoIndex].nome,
         quantidade,
         precoUnitario: produtos[produtoIndex].preco,
-        total: produtos[produtoIndex].preco * quantidade,
-        dataVenda
+        total: produtos[produtoIndex].preco*quantidade
       };
-
       vendas.push(venda);
       localStorage.setItem('vendas', JSON.stringify(vendas));
 
-      produtos[produtoIndex].estoque = parseInt(produtos[produtoIndex].estoque) - quantidade;
+      produtos[produtoIndex].estoque -= quantidade;
       localStorage.setItem('produtos', JSON.stringify(produtos));
 
-      document.getElementById('formVenda').reset();
+      document.getElementById('quantidadeVenda').value='';
       listarVendas();
       listarProdutos();
       atualizarSelects();
     }
-
     function listarVendas() {
-      let vendas = JSON.parse(localStorage.getItem('vendas')) || [];
-      let lista = document.getElementById('listaVendas');
-      lista.innerHTML = '';
-      vendas.forEach(v => {
-        lista.innerHTML += `<tr>
-          <td>${v.dataVenda}</td>
-          <td>${v.cliente}</td>
-          <td>${v.produto}</td>
-          <td>${v.quantidade}</td>
-          <td>R$ ${v.precoUnitario.toFixed(2)}</td>
+      let vendas = JSON.parse(localStorage.getItem('vendas'))||[];
+      const filtroCliente = document.getElementById('filtroCliente').value;
+      if(filtroCliente!==""){
+        vendas = vendas.filter(v=>v.cliente===filtroCliente);
+      }
+      document.getElementById('listaVendas').innerHTML = vendas.map((v,i)=>`
+        <tr>
+          <td>${v.data}</td><td>${v.cliente}</td><td>${v.produto}</td>
+          <td>${v.quantidade}</td><td>R$ ${v.precoUnitario.toFixed(2)}</td>
           <td>R$ ${v.total.toFixed(2)}</td>
-        </tr>`;
-      });
+          <td><button onclick="excluirVenda(${i})">Excluir</button></td>
+        </tr>
+      `).join('');
 
-      let totalGeral = vendas.reduce((soma, v) => soma + v.total, 0);
-      document.getElementById('totalVendas').innerText = "Total vendido: R$ " + totalGeral.toFixed(2);
+      const total = vendas.reduce((s,v)=>s+v.total,0);
+      document.getElementById('totalVendas').innerText = "Total de Vendas: R$ "+total.toFixed(2);
+    }
+    function excluirVenda(i){
+      const senha = prompt("Digite a senha para excluir (padrão 1234):");
+      if(senha!=="1234"){ alert("Senha incorreta!"); return; }
+      let vendas = JSON.parse(localStorage.getItem('vendas'))||[];
+      vendas.splice(i,1);
+      localStorage.setItem('vendas', JSON.stringify(vendas));
+      listarVendas();
     }
 
-    function atualizarSelects() {
-      let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-      let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-      let selectCliente = document.getElementById('selectCliente');
-      let selectProduto = document.getElementById('selectProduto');
-
-      selectCliente.innerHTML = '<option value="">Selecione um cliente</option>';
-      clientes.forEach((c, i) => {
-        selectCliente.innerHTML += `<option value="${i}">${c.nome}</option>`;
-      });
-
-      selectProduto.innerHTML = '<option value="">Selecione um produto</option>';
-      produtos.forEach((p, i) => {
-        selectProduto.innerHTML += `<option value="${i}">${p.nome} (Estoque: ${p.estoque})</option>`;
-      });
+    // Selects
+    function atualizarSelects(){
+      let clientes = JSON.parse(localStorage.getItem('clientes'))||[];
+      let produtos = JSON.parse(localStorage.getItem('produtos'))||[];
+      document.getElementById('selectCliente').innerHTML = clientes.map((c,i)=>`<option value="${i}">${c.nome}</option>`).join('');
+      document.getElementById('selectProduto').innerHTML = produtos.map((p,i)=>`<option value="${i}">${p.nome}</option>`).join('');
+      document.getElementById('filtroCliente').innerHTML = `<option value="">Todos</option>`+clientes.map(c=>`<option value="${c.nome}">${c.nome}</option>`).join('');
     }
+
+    mostrarAba('produtos');
+  </script>
+</body>
+</html>
 
     // Inicialização
     listarProdutos();
