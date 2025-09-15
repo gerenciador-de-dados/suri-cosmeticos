@@ -3,81 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>App Vendas Cosméticos</title>
+<title>Suri Cosméticos</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
-    margin: 0;
-    padding: 0;
-  }
-  header {
-    background-color: #e91e63;
-    color: white;
-    padding: 15px;
-    text-align: center;
-  }
-  nav {
-    display: flex;
-    justify-content: center;
-    margin: 10px 0;
-  }
-  nav button {
-    margin: 0 10px;
-    padding: 10px 20px;
-    background-color: #fff;
-    border: 2px solid #e91e63;
-    color: #e91e63;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  nav button.active {
-    background-color: #e91e63;
-    color: #fff;
-  }
-  section {
-    display: none;
-    max-width: 600px;
-    margin: 20px auto;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  }
-  section.active {
-    display: block;
-  }
-  input, select {
-    width: 100%;
-    padding: 8px;
-    margin: 8px 0 15px 0;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-  }
-  button.save {
-    background-color: #e91e63;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 5px;
-    font-weight: bold;
-  }
-  h2 {
-    text-align: center;
-    color: #e91e63;
-  }
-  ul {
-    list-style: none;
-    padding: 0;
-  }
-  ul li {
-    background-color: #f1f1f1;
-    padding: 8px;
-    margin-bottom: 5px;
-    border-radius: 5px;
-  }
+  body { font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0; }
+  header { background-color: #e91e63; color: white; padding: 15px; text-align: center; }
+  nav { display: flex; justify-content: center; margin: 10px 0; }
+  nav button { margin: 0 10px; padding: 10px 20px; background-color: #fff; border: 2px solid #e91e63; color: #e91e63; font-weight: bold; cursor: pointer; border-radius: 5px; }
+  nav button.active { background-color: #e91e63; color: #fff; }
+  section { display: none; max-width: 600px; margin: 20px auto; background-color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+  section.active { display: block; }
+  input { width: 100%; padding: 8px; margin: 8px 0 15px 0; border-radius: 5px; border: 1px solid #ccc; }
+  button.save, button.edit { background-color: #e91e63; color: #fff; border: none; padding: 5px 10px; cursor: pointer; border-radius: 5px; font-weight: bold; margin-left: 5px; }
+  h2 { text-align: center; color: #e91e63; }
+  ul { list-style: none; padding: 0; }
+  ul li { background-color: #f1f1f1; padding: 8px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+  .item-info { flex-grow: 1; }
 </style>
 </head>
 <body>
@@ -97,7 +37,7 @@
   <input type="text" id="descricaoProduto" placeholder="Descrição">
   <input type="number" id="precoProduto" placeholder="Preço">
   <input type="number" id="estoqueProduto" placeholder="Estoque">
-  <input type="text" id="categoriaProduto" placeholder="Categoria">
+  <input type="text" id="marcaProduto" placeholder="Marca">
   <button class="save" onclick="salvarProduto()">Salvar Produto</button>
   <h3>Produtos Cadastrados:</h3>
   <ul id="listaProdutos"></ul>
@@ -108,14 +48,13 @@
   <input type="text" id="nomeCliente" placeholder="Nome Completo">
   <input type="text" id="telefoneCliente" placeholder="Telefone">
   <input type="email" id="emailCliente" placeholder="E-mail">
-  <input type="text" id="cpfCliente" placeholder="CPF">
   <button class="save" onclick="salvarCliente()">Salvar Cliente</button>
   <h3>Clientes Cadastrados:</h3>
   <ul id="listaClientes"></ul>
 </section>
 
 <script>
-  // Navegação entre seções
+  // Navegação
   const btnProdutos = document.getElementById('btnProdutos');
   const btnClientes = document.getElementById('btnClientes');
   const secProdutos = document.getElementById('produtos');
@@ -135,69 +74,115 @@
     btnProdutos.classList.remove('active');
   });
 
-  // Função para salvar produto
+  // Produtos
+  let editarProdutoIndex = null;
+
   function salvarProduto() {
     const nome = document.getElementById('nomeProduto').value;
     const descricao = document.getElementById('descricaoProduto').value;
     const preco = document.getElementById('precoProduto').value;
     const estoque = document.getElementById('estoqueProduto').value;
-    const categoria = document.getElementById('categoriaProduto').value;
+    const marca = document.getElementById('marcaProduto').value;
 
     if(!nome || !preco) { alert('Preencha pelo menos o nome e o preço!'); return; }
 
     let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-    produtos.push({nome, descricao, preco, estoque, categoria});
+
+    if(editarProdutoIndex !== null) {
+      produtos[editarProdutoIndex] = {nome, descricao, preco, estoque, marca};
+      editarProdutoIndex = null;
+    } else {
+      produtos.push({nome, descricao, preco, estoque, marca});
+    }
+
     localStorage.setItem('produtos', JSON.stringify(produtos));
+    limparFormularioProduto();
+    listarProdutos();
+  }
+
+  function editarProduto(index) {
+    let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+    const p = produtos[index];
+    document.getElementById('nomeProduto').value = p.nome;
+    document.getElementById('descricaoProduto').value = p.descricao;
+    document.getElementById('precoProduto').value = p.preco;
+    document.getElementById('estoqueProduto').value = p.estoque;
+    document.getElementById('marcaProduto').value = p.marca;
+    editarProdutoIndex = index;
+  }
+
+  function limparFormularioProduto() {
     document.getElementById('nomeProduto').value = '';
     document.getElementById('descricaoProduto').value = '';
     document.getElementById('precoProduto').value = '';
     document.getElementById('estoqueProduto').value = '';
-    document.getElementById('categoriaProduto').value = '';
-    listarProdutos();
+    document.getElementById('marcaProduto').value = '';
   }
 
   function listarProdutos() {
     const lista = document.getElementById('listaProdutos');
     lista.innerHTML = '';
     let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-    produtos.forEach(p => {
+    produtos.forEach((p, index) => {
       const li = document.createElement('li');
-      li.textContent = `${p.nome} - R$${p.preco} - Estoque: ${p.estoque} - Categoria: ${p.categoria}`;
+      li.innerHTML = `<span class="item-info">${p.nome} - R$${p.preco} - Estoque: ${p.estoque} - Marca: ${p.marca}</span>
+                      <button class="edit" onclick="editarProduto(${index})">Editar</button>`;
       lista.appendChild(li);
     });
   }
 
-  // Função para salvar cliente
+  // Clientes
+  let editarClienteIndex = null;
+
   function salvarCliente() {
     const nome = document.getElementById('nomeCliente').value;
     const telefone = document.getElementById('telefoneCliente').value;
     const email = document.getElementById('emailCliente').value;
-    const cpf = document.getElementById('cpfCliente').value;
 
     if(!nome) { alert('Preencha o nome!'); return; }
 
     let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-    clientes.push({nome, telefone, email, cpf});
+
+    if(editarClienteIndex !== null) {
+      clientes[editarClienteIndex] = {nome, telefone, email};
+      editarClienteIndex = null;
+    } else {
+      clientes.push({nome, telefone, email});
+    }
+
     localStorage.setItem('clientes', JSON.stringify(clientes));
+    limparFormularioCliente();
+    listarClientes();
+  }
+
+  function editarCliente(index) {
+    let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+    const c = clientes[index];
+    document.getElementById('nomeCliente').value = c.nome;
+    document.getElementById('telefoneCliente').value = c.telefone;
+    document.getElementById('emailCliente').value = c.email;
+    editarClienteIndex = index;
+  }
+
+  function limparFormularioCliente() {
     document.getElementById('nomeCliente').value = '';
     document.getElementById('telefoneCliente').value = '';
     document.getElementById('emailCliente').value = '';
-    document.getElementById('cpfCliente').value = '';
-    listarClientes();
   }
 
   function listarClientes() {
     const lista = document.getElementById('listaClientes');
     lista.innerHTML = '';
     let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-    clientes.forEach(c => {
+    clientes.forEach((c, index) => {
       const li = document.createElement('li');
-      li.textContent = `${c.nome} - Telefone: ${c.telefone} - E-mail: ${c.email} - CPF: ${c.cpf}`;
+      li.innerHTML = `<span class="item-info">${c.nome} - Telefone: ${c.telefone} - E-mail: ${c.email}</span>
+                      <button class="edit" onclick="editarCliente(${index})">Editar</button>`;
       lista.appendChild(li);
     });
   }
 
-  // Listar itens ao carregar a página
+  // Listar ao carregar
   listarProdutos();
   listarClientes();
 </script>
