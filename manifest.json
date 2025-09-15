@@ -1,0 +1,15 @@
+{
+  "name": "App Vendas Cosméticos",
+  "short_name": "Vendas",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#b30000",
+  "theme_color": "#b30000",
+  "icons": [
+    {
+      "src": "ChatGPT Image 15 de set. de 2025, 09_46_37",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

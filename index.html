@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<link rel="manifest" href="manifest.json">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(() => console.log('Service Worker registrado!'));
+  }
+</script>
+  <meta charset="UTF-8">
+  <title>App de Vendas - Cosméticos</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; }
+    header { background: #b30000; color: white; padding: 10px; text-align: center; }
+    nav { display: flex; justify-content: center; background: #800000; }
+    nav button { flex: 1; padding: 12px; background: #800000; border: none; color: white; font-weight: bold; cursor: pointer; }
+    nav button:hover { background: #b30000; }
+    .container { padding: 20px; }
+    .card { display: none; background: white; padding: 15px; margin-top: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    h2 { color: #b30000; }
+    input, select, button.action { margin: 5px 0; padding: 8px; width: 100%; border: 1px solid #ccc; border-radius: 5px; }
+    button.action { background: #b30000; color: white; font-weight: bold; cursor: pointer; }
+    button.action:hover { background: #800000; }
+    ul { padding: 0; list-style: none; }
+    li { padding: 5px; border-bottom: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>?? App de Vendas - Cosméticos</h1>
+  </header>
+
+  <!-- Navegação -->
+  <nav>
+    <button onclick="mostrar('produtos')">Produtos</button>
+    <button onclick="mostrar('clientes')">Clientes</button>
+    <button onclick="mostrar('vendas')">Vendas</button>
+  </nav>
+
+  <div class="container">
+    <!-- Cadastro de Produtos -->
+    <div id="produtos" class="card">
+      <h2>Cadastro de Produtos</h2>
+      <input type="text" id="produtoNome" placeholder="Nome do produto">
+      <input type="number" id="produtoValor" placeholder="Valor de venda (R$)">
+      <input type="number" id="produtoEstoque" placeholder="Estoque inicial">
+      <button class="action" onclick="cadastrarProduto()">Cadastrar Produto</button>
+      <ul id="listaProdutos"></ul>
+    </div>
+
+    <!-- Cadastro de Clientes -->
+    <div id="clientes" class="card">
+      <h2>Cadastro de Clientes</h2>
+      <input type="text" id="clienteNome" placeholder="Nome do cliente">
+      <input type="text" id="clienteTelefone" placeholder="Telefone (com DDD)">
+      <button class="action" onclick="cadastrarCliente()">Cadastrar Cliente</button>
+      <ul id="listaClientes"></ul>
+    </div>
+
+    <!-- Criar Venda -->
+    <div id="vendas" class="card">
+      <h2>Criar Venda</h2>
+      <select id="clienteSelect"></select>
+      <select id="produtoSelect"></select>
+      <input type="number" id="quantidadeVenda" placeholder="Quantidade">
+      <button class="action" onclick="adicionarProdutoVenda()">Adicionar Produto</button>
+      <ul id="carrinho"></ul>
+      <h3>Total: R$ <span id="totalVenda">0.00</span></h3>
+      <button class="action" onclick="finalizarVenda()">Finalizar e Enviar WhatsApp</button>
+    </div>
+  </div>
+
+  <script>
+    let produtos = [];
+    let clientes = [];
+    let carrinho = [];
+
+    function mostrar(secao) {
+      document.querySelectorAll('.card').forEach(div => div.style.display = 'none');
+      document.getElementById(secao).style.display = 'block';
+    }
+
+    function atualizarListas() {
+      let listaProdutos = document.getElementById("listaProdutos");
+      listaProdutos.innerHTML = "";
+      let produtoSelect = document.getElementById("produtoSelect");
+      produtoSelect.innerHTML = "";
+      produtos.forEach((p, i) => {
+        listaProdutos.innerHTML += `<li>${p.nome} - R$${p.valor} | Estoque: ${p.estoque}</li>`;
+        produtoSelect.innerHTML += `<option value="${i}">${p.nome} (R$${p.valor})</option>`;
+      });
+
+      let listaClientes = document.getElementById("listaClientes");
+      listaClientes.innerHTML = "";
+      let clienteSelect = document.getElementById("clienteSelect");
+      clienteSelect.innerHTML = "";
+      clientes.forEach((c, i) => {
+        listaClientes.innerHTML += `<li>${c.nome} - ${c.telefone}</li>`;
+        clienteSelect.innerHTML += `<option value="${i}">${c.nome}</option>`;
+      });
+    }
+
+    function cadastrarProduto() {
+      let nome = document.getElementById("produtoNome").value;
+      let valor = parseFloat(document.getElementById("produtoValor").value);
+      let estoque = pars
