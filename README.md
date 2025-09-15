@@ -1,1 +1,1 @@
-# app-vendas-cosm-ticos
+# Suri Cosméticos
