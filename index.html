@@ -1,107 +1,206 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<link rel="manifest" href="manifest.json">
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(() => console.log('Service Worker registrado!'));
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>App Vendas Cosméticos</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 0;
   }
-</script>
-  <meta charset="UTF-8">
-  <title>App de Vendas - Cosméticos</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; }
-    header { background: #b30000; color: white; padding: 10px; text-align: center; }
-    nav { display: flex; justify-content: center; background: #800000; }
-    nav button { flex: 1; padding: 12px; background: #800000; border: none; color: white; font-weight: bold; cursor: pointer; }
-    nav button:hover { background: #b30000; }
-    .container { padding: 20px; }
-    .card { display: none; background: white; padding: 15px; margin-top: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    h2 { color: #b30000; }
-    input, select, button.action { margin: 5px 0; padding: 8px; width: 100%; border: 1px solid #ccc; border-radius: 5px; }
-    button.action { background: #b30000; color: white; font-weight: bold; cursor: pointer; }
-    button.action:hover { background: #800000; }
-    ul { padding: 0; list-style: none; }
-    li { padding: 5px; border-bottom: 1px solid #ddd; }
-  </style>
+  header {
+    background-color: #e91e63;
+    color: white;
+    padding: 15px;
+    text-align: center;
+  }
+  nav {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+  }
+  nav button {
+    margin: 0 10px;
+    padding: 10px 20px;
+    background-color: #fff;
+    border: 2px solid #e91e63;
+    color: #e91e63;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  nav button.active {
+    background-color: #e91e63;
+    color: #fff;
+  }
+  section {
+    display: none;
+    max-width: 600px;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  section.active {
+    display: block;
+  }
+  input, select {
+    width: 100%;
+    padding: 8px;
+    margin: 8px 0 15px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  button.save {
+    background-color: #e91e63;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+  h2 {
+    text-align: center;
+    color: #e91e63;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  ul li {
+    background-color: #f1f1f1;
+    padding: 8px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+  }
+</style>
 </head>
 <body>
 
-  <header>
-    <h1>?? App de Vendas - Cosméticos</h1>
-  </header>
+<header>
+  <h1>App Vendas Cosméticos</h1>
+</header>
 
-  <!-- Navegação -->
-  <nav>
-    <button onclick="mostrar('produtos')">Produtos</button>
-    <button onclick="mostrar('clientes')">Clientes</button>
-    <button onclick="mostrar('vendas')">Vendas</button>
-  </nav>
+<nav>
+  <button id="btnProdutos" class="active">Produtos</button>
+  <button id="btnClientes">Clientes</button>
+</nav>
 
-  <div class="container">
-    <!-- Cadastro de Produtos -->
-    <div id="produtos" class="card">
-      <h2>Cadastro de Produtos</h2>
-      <input type="text" id="produtoNome" placeholder="Nome do produto">
-      <input type="number" id="produtoValor" placeholder="Valor de venda (R$)">
-      <input type="number" id="produtoEstoque" placeholder="Estoque inicial">
-      <button class="action" onclick="cadastrarProduto()">Cadastrar Produto</button>
-      <ul id="listaProdutos"></ul>
-    </div>
+<section id="produtos" class="active">
+  <h2>Cadastro de Produtos</h2>
+  <input type="text" id="nomeProduto" placeholder="Nome do Produto">
+  <input type="text" id="descricaoProduto" placeholder="Descrição">
+  <input type="number" id="precoProduto" placeholder="Preço">
+  <input type="number" id="estoqueProduto" placeholder="Estoque">
+  <input type="text" id="categoriaProduto" placeholder="Categoria">
+  <button class="save" onclick="salvarProduto()">Salvar Produto</button>
+  <h3>Produtos Cadastrados:</h3>
+  <ul id="listaProdutos"></ul>
+</section>
 
-    <!-- Cadastro de Clientes -->
-    <div id="clientes" class="card">
-      <h2>Cadastro de Clientes</h2>
-      <input type="text" id="clienteNome" placeholder="Nome do cliente">
-      <input type="text" id="clienteTelefone" placeholder="Telefone (com DDD)">
-      <button class="action" onclick="cadastrarCliente()">Cadastrar Cliente</button>
-      <ul id="listaClientes"></ul>
-    </div>
+<section id="clientes">
+  <h2>Cadastro de Clientes</h2>
+  <input type="text" id="nomeCliente" placeholder="Nome Completo">
+  <input type="text" id="telefoneCliente" placeholder="Telefone">
+  <input type="email" id="emailCliente" placeholder="E-mail">
+  <input type="text" id="cpfCliente" placeholder="CPF">
+  <button class="save" onclick="salvarCliente()">Salvar Cliente</button>
+  <h3>Clientes Cadastrados:</h3>
+  <ul id="listaClientes"></ul>
+</section>
 
-    <!-- Criar Venda -->
-    <div id="vendas" class="card">
-      <h2>Criar Venda</h2>
-      <select id="clienteSelect"></select>
-      <select id="produtoSelect"></select>
-      <input type="number" id="quantidadeVenda" placeholder="Quantidade">
-      <button class="action" onclick="adicionarProdutoVenda()">Adicionar Produto</button>
-      <ul id="carrinho"></ul>
-      <h3>Total: R$ <span id="totalVenda">0.00</span></h3>
-      <button class="action" onclick="finalizarVenda()">Finalizar e Enviar WhatsApp</button>
-    </div>
-  </div>
+<script>
+  // Navegação entre seções
+  const btnProdutos = document.getElementById('btnProdutos');
+  const btnClientes = document.getElementById('btnClientes');
+  const secProdutos = document.getElementById('produtos');
+  const secClientes = document.getElementById('clientes');
 
-  <script>
-    let produtos = [];
-    let clientes = [];
-    let carrinho = [];
+  btnProdutos.addEventListener('click', () => {
+    secProdutos.classList.add('active');
+    secClientes.classList.remove('active');
+    btnProdutos.classList.add('active');
+    btnClientes.classList.remove('active');
+  });
 
-    function mostrar(secao) {
-      document.querySelectorAll('.card').forEach(div => div.style.display = 'none');
-      document.getElementById(secao).style.display = 'block';
-    }
+  btnClientes.addEventListener('click', () => {
+    secClientes.classList.add('active');
+    secProdutos.classList.remove('active');
+    btnClientes.classList.add('active');
+    btnProdutos.classList.remove('active');
+  });
 
-    function atualizarListas() {
-      let listaProdutos = document.getElementById("listaProdutos");
-      listaProdutos.innerHTML = "";
-      let produtoSelect = document.getElementById("produtoSelect");
-      produtoSelect.innerHTML = "";
-      produtos.forEach((p, i) => {
-        listaProdutos.innerHTML += `<li>${p.nome} - R$${p.valor} | Estoque: ${p.estoque}</li>`;
-        produtoSelect.innerHTML += `<option value="${i}">${p.nome} (R$${p.valor})</option>`;
-      });
+  // Função para salvar produto
+  function salvarProduto() {
+    const nome = document.getElementById('nomeProduto').value;
+    const descricao = document.getElementById('descricaoProduto').value;
+    const preco = document.getElementById('precoProduto').value;
+    const estoque = document.getElementById('estoqueProduto').value;
+    const categoria = document.getElementById('categoriaProduto').value;
 
-      let listaClientes = document.getElementById("listaClientes");
-      listaClientes.innerHTML = "";
-      let clienteSelect = document.getElementById("clienteSelect");
-      clienteSelect.innerHTML = "";
-      clientes.forEach((c, i) => {
-        listaClientes.innerHTML += `<li>${c.nome} - ${c.telefone}</li>`;
-        clienteSelect.innerHTML += `<option value="${i}">${c.nome}</option>`;
-      });
-    }
+    if(!nome || !preco) { alert('Preencha pelo menos o nome e o preço!'); return; }
 
-    function cadastrarProduto() {
-      let nome = document.getElementById("produtoNome").value;
-      let valor = parseFloat(document.getElementById("produtoValor").value);
-      let estoque = pars
+    let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+    produtos.push({nome, descricao, preco, estoque, categoria});
+    localStorage.setItem('produtos', JSON.stringify(produtos));
+    document.getElementById('nomeProduto').value = '';
+    document.getElementById('descricaoProduto').value = '';
+    document.getElementById('precoProduto').value = '';
+    document.getElementById('estoqueProduto').value = '';
+    document.getElementById('categoriaProduto').value = '';
+    listarProdutos();
+  }
+
+  function listarProdutos() {
+    const lista = document.getElementById('listaProdutos');
+    lista.innerHTML = '';
+    let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+    produtos.forEach(p => {
+      const li = document.createElement('li');
+      li.textContent = `${p.nome} - R$${p.preco} - Estoque: ${p.estoque} - Categoria: ${p.categoria}`;
+      lista.appendChild(li);
+    });
+  }
+
+  // Função para salvar cliente
+  function salvarCliente() {
+    const nome = document.getElementById('nomeCliente').value;
+    const telefone = document.getElementById('telefoneCliente').value;
+    const email = document.getElementById('emailCliente').value;
+    const cpf = document.getElementById('cpfCliente').value;
+
+    if(!nome) { alert('Preencha o nome!'); return; }
+
+    let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+    clientes.push({nome, telefone, email, cpf});
+    localStorage.setItem('clientes', JSON.stringify(clientes));
+    document.getElementById('nomeCliente').value = '';
+    document.getElementById('telefoneCliente').value = '';
+    document.getElementById('emailCliente').value = '';
+    document.getElementById('cpfCliente').value = '';
+    listarClientes();
+  }
+
+  function listarClientes() {
+    const lista = document.getElementById('listaClientes');
+    lista.innerHTML = '';
+    let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+    clientes.forEach(c => {
+      const li = document.createElement('li');
+      li.textContent = `${c.nome} - Telefone: ${c.telefone} - E-mail: ${c.email} - CPF: ${c.cpf}`;
+      lista.appendChild(li);
+    });
+  }
+
+  // Listar itens ao carregar a página
+  listarProdutos();
+  listarClientes();
+</script>
+
+</body>
+</html>
