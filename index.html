@@ -22,6 +22,7 @@
 </head>
 <body>
   <header>Suri CosmÃ©ticos</header>
+
   <nav>
     <button onclick="mostrarAba('produtos')">Produtos</button>
     <button onclick="mostrarAba('clientes')">Clientes</button>
@@ -102,8 +103,10 @@
       listarProdutos();
       listarClientes();
       listarVendas();
+      atualizarSelects();
     }
 
+    // Produtos
     function salvarProduto() {
       const nome = document.getElementById("nomeProduto").value;
       const descricao = document.getElementById("descricaoProduto").value;
@@ -112,10 +115,14 @@
       const marca = document.getElementById("marcaProduto").value;
       const entrada = new Date().toLocaleDateString();
 
-      if (nome && preco) {
+      if (nome && !isNaN(preco) && !isNaN(estoque)) {
         produtos.push({ nome, descricao, preco, estoque, marca, entrada });
         localStorage.setItem("produtos", JSON.stringify(produtos));
         listarProdutos();
+        atualizarSelects();
+        limparCamposProduto();
+      } else {
+        alert("Preencha nome, preÃ§o e estoque corretamente!");
       }
     }
 
@@ -124,18 +131,28 @@
       tbody.innerHTML = "";
       produtos.forEach((p, i) => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${p.nome}</td>
-                        <td>${p.descricao}</td>
-                        <td>R$${p.preco.toFixed(2)}</td>
-                        <td>${p.estoque}</td>
-                        <td>${p.marca}</td>
-                        <td>${p.entrada}</td>
-                        <td><button onclick="alterarProduto(${i})">Alterar</button></td>`;
+        tr.innerHTML = `
+          <td>${p.nome}</td>
+          <td>${p.descricao}</td>
+          <td>R$${p.preco.toFixed(2)}</td>
+          <td>${p.estoque}</td>
+          <td>${p.marca}</td>
+          <td>${p.entrada}</td>
+          <td><button onclick="alterarProduto(${i})">Alterar</button></td>
+        `;
         tbody.appendChild(tr);
       });
-      atualizarProdutosVenda();
     }
 
+    function limparCamposProduto() {
+      document.getElementById("nomeProduto").value = "";
+      document.getElementById("descricaoProduto").value = "";
+      document.getElementById("precoProduto").value = "";
+      document.getElementById("estoqueProduto").value = "";
+      document.getElementById("marcaProduto").value = "";
+    }
+
+    // Clientes
     function salvarCliente() {
       const nome = document.getElementById("nomeCliente").value;
       const telefone = document.getElementById("telefoneCliente").value;
@@ -145,6 +162,10 @@
         clientes.push({ nome, telefone, email });
         localStorage.setItem("clientes", JSON.stringify(clientes));
         listarClientes();
+        atualizarSelects();
+        limparCamposCliente();
+      } else {
+        alert("Preencha o nome do cliente!");
       }
     }
 
@@ -153,38 +174,54 @@
       tbody.innerHTML = "";
       clientes.forEach((c, i) => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${c.nome}</td>
-                        <td>${c.telefone}</td>
-                        <td>${c.email}</td>
-                        <td><button onclick="alterarCliente(${i})">Alterar</button></td>`;
+        tr.innerHTML = `
+          <td>${c.nome}</td>
+          <td>${c.telefone}</td>
+          <td>${c.email}</td>
+          <td><button onclick="alterarCliente(${i})">Alterar</button></td>
+        `;
         tbody.appendChild(tr);
       });
-      atualizarClientesVenda();
     }
 
+    function limparCamposCliente() {
+      document.getElementById("nomeCliente").value = "";
+      document.getElementById("telefoneCliente").value = "";
+      document.getElementById("emailCliente").value = "";
+    }
+
+    // Vendas
     function registrarVenda() {
       const clienteIndex = document.getElementById("clienteVenda").value;
       const produtoIndex = document.getElementById("produtoVenda").value;
       const quantidade = parseInt(document.getElementById("quantidadeVenda").value);
 
-      if (clienteIndex !== "" && produtoIndex !== "" && quantidade > 0) {
-        const cliente = clientes[clienteIndex].nome;
-        const produto = produtos[produtoIndex].nome;
-        const preco = produtos[produtoIndex].preco;
-        const total = preco * quantidade;
-        const data = new Date().toLocaleString();
-
-        if (produtos[produtoIndex].estoque >= quantidade) {
-          produtos[produtoIndex].estoque -= quantidade;
-          vendas.push({ cliente, produto, quantidade, total, data });
-          localStorage.setItem("produtos", JSON.stringify(produtos));
-          localStorage.setItem("vendas", JSON.stringify(vendas));
-          listarProdutos();
-          listarVendas();
-        } else {
-          alert("Estoque insuficiente!");
-        }
+      if (clienteIndex === "" || produtoIndex === "" || isNaN(quantidade) || quantidade <= 0) {
+        alert("Preencha todos os campos corretamente!");
+        return;
       }
+
+      const cliente = clientes[clienteIndex].nome;
+      const produto = produtos[produtoIndex].nome;
+      const preco = produtos[produtoIndex].preco;
+
+      if (produtos[produtoIndex].estoque < quantidade) {
+        alert("Estoque insuficiente!");
+        return;
+      }
+
+      const total = preco * quantidade;
+      const data = new Date().toLocaleString();
+
+      produtos[produtoIndex].estoque -= quantidade;
+      vendas.push({ cliente, produto, quantidade, total, data });
+      localStorage.setItem("produtos", JSON.stringify(produtos));
+      localStorage.setItem("vendas", JSON.stringify(vendas));
+
+      listarProdutos();
+      listarVendas();
+      atualizarSelects();
+      document.getElementById("quantidadeVenda").value = "";
     }
 
     function listarVendas() {
@@ -196,8 +233,10 @@
       vendas.forEach((v, i) => {
         soma += v.total;
         const li = document.createElement("li");
-        li.innerHTML = `${v.data} - ${v.cliente} comprou ${v.quantidade} x ${v.produto} - Total: R$${v.total.toFixed(2)}
-                        <button onclick="excluirVenda(${i})">Excluir</button>`;
+        li.innerHTML = `
+          ${v.data} - ${v.cliente} comprou ${v.quantidade} x ${v.produto} - Total: R$${v.total.toFixed(2)}
+          <button onclick="excluirVenda(${i})">Excluir</button>
+        `;
         lista.appendChild(li);
       });
 
@@ -210,30 +249,31 @@
         vendas.splice(i, 1);
         localStorage.setItem("vendas", JSON.stringify(vendas));
         listarVendas();
+        listarProdutos();
       } else {
         alert("Senha incorreta!");
       }
     }
 
-    function atualizarProdutosVenda() {
-      const select = document.getElementById("produtoVenda");
-      select.innerHTML = "";
-      produtos.forEach((p, i) => {
-        const option = document.createElement("option");
-        option.value = i;
-        option.textContent = p.nome;
-        select.appendChild(option);
-      });
-    }
+    // Atualizar selects
+    function atualizarSelects() {
+      const selectCliente = document.getElementById("clienteVenda");
+      const selectProduto = document.getElementById("produtoVenda");
 
-    function atualizarClientesVenda() {
-      const select = document.getElementById("clienteVenda");
-      select.innerHTML = "";
+      selectCliente.innerHTML = "";
       clientes.forEach((c, i) => {
         const option = document.createElement("option");
         option.value = i;
         option.textContent = c.nome;
-        select.appendChild(option);
+        selectCliente.appendChild(option);
+      });
+
+      selectProduto.innerHTML = "";
+      produtos.forEach((p, i) => {
+        const option = document.createElement("option");
+        option.value = i;
+        option.textContent = p.nome;
+        selectProduto.appendChild(option);
       });
     }
 
@@ -241,67 +281,7 @@
     listarProdutos();
     listarClientes();
     listarVendas();
-  </script>
-</body>
-</html>
-t vendas = JSON.parse(localStorage.getItem('vendas'))||[];
-      const filtroCliente = document.getElementById('filtroCliente').value;
-      if(filtroCliente!==""){
-        vendas = vendas.filter(v=>v.cliente===filtroCliente);
-      }
-      document.getElementById('listaVendas').innerHTML = vendas.map((v,i)=>`
-        <tr>
-          <td>${v.data}</td><td>${v.cliente}</td><td>${v.produto}</td>
-          <td>${v.quantidade}</td><td>R$ ${v.precoUnitario.toFixed(2)}</td>
-          <td>R$ ${v.total.toFixed(2)}</td>
-          <td><button onclick="excluirVenda(${i})">Excluir</button></td>
-        </tr>
-      `).join('');
-
-      const total = vendas.reduce((s,v)=>s+v.total,0);
-      document.getElementById('totalVendas').innerText = "Total de Vendas: R$ "+total.toFixed(2);
-    }
-    function excluirVenda(i){
-      const senha = prompt("Digite a senha para excluir (padrão 1234):");
-      if(senha!=="1234"){ alert("Senha incorreta!"); return; }
-      let vendas = JSON.parse(localStorage.getItem('vendas'))||[];
-      vendas.splice(i,1);
-      localStorage.setItem('vendas', JSON.stringify(vendas));
-      listarVendas();
-    }
-
-    // Selects
-    function atualizarSelects(){
-      let clientes = JSON.parse(localStorage.getItem('clientes'))||[];
-      let produtos = JSON.parse(localStorage.getItem('produtos'))||[];
-      document.getElementById('selectCliente').innerHTML = clientes.map((c,i)=>`<option value="${i}">${c.nome}</option>`).join('');
-      document.getElementById('selectProduto').innerHTML = produtos.map((p,i)=>`<option value="${i}">${p.nome}</option>`).join('');
-      document.getElementById('filtroCliente').innerHTML = `<option value="">Todos</option>`+clientes.map(c=>`<option value="${c.nome}">${c.nome}</option>`).join('');
-    }
-
-    mostrarAba('produtos');
-  </script>
-</body>
-</html>
-
-    // Inicialização
-    listarProdutos();
-    listarClientes();
-    listarVendas();
     atualizarSelects();
   </script>
-</body>
-</html>
- = `${v.cliente} comprou ${v.quantidade} x ${v.produto} - Total: R$${v.total.toFixed(2)}`;
-      lista.appendChild(li);
-    });
-  }
-
-  // Inicializar
-  listarProdutos();
-  listarClientes();
-  listarVendas();
-</script>
-
 </body>
 </html>
