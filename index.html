@@ -1,0 +1,715 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Suri Cosméticos — Gestão Completa</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{
+      --bg:#fff0f6;
+      --primary:#f06292;
+      --primary-dark:#c2185b;
+      --card:#ffffff;
+    }
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;background:var(--bg);color:#222;}
+    header{background:var(--primary);color:white;padding:14px;text-align:center;font-size:20px;font-weight:700;}
+    nav{display:flex;justify-content:center;gap:8px;padding:10px;background:#ffd7ed;flex-wrap:wrap;}
+    nav button{background:white;border:1px solid var(--primary);color:var(--primary);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700;}
+    nav button.active{background:var(--primary-dark);color:white;box-shadow:0 2px 6px rgba(0,0,0,0.12);}
+    .container{max-width:1100px;margin:18px auto;padding:0 12px;}
+    .card{background:var(--card);padding:12px;border-radius:10px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+    .grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));align-items:start;}
+    input, select, textarea, button {font-family:inherit;font-size:14px;}
+    input, select, textarea{width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;}
+    button.btn{background:var(--primary);color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;}
+    button.danger{background:#ff5252;color:white;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;}
+    table{width:100%;border-collapse:collapse;font-size:14px;}
+    th,td{padding:8px;border:1px solid #f4c2d7;text-align:left;}
+    th{background:#f48fb1;color:white;}
+    .muted{color:#666;font-size:13px;}
+    .small{font-size:13px;padding:6px;}
+    .right{text-align:right;}
+    .parcel-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;margin-bottom:6px;}
+    .flex{display:flex;gap:8px;align-items:center;}
+    .top-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+    @media(max-width:600px){.grid{grid-template-columns:1fr} .parcel-row{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+  <header>Suri Cosméticos — Gestão Completa</header>
+  <nav id="menu">
+    <button data-tab="produtos">Produtos</button>
+    <button data-tab="clientes">Clientes</button>
+    <button data-tab="entradas">Entradas</button>
+    <button data-tab="vendas">Vendas</button>
+    <button data-tab="financeiro">Financeiro</button>
+    <button data-tab="backup">Backup / Importar</button>
+  </nav>
+
+  <div class="container">
+    <!-- PRODUTOS -->
+    <section id="produtos" class="card tab">
+      <h3>Cadastro de Produtos</h3>
+      <div class="grid">
+        <div>
+          <label>Nome</label>
+          <input id="nomeProduto" placeholder="Nome do produto" />
+        </div>
+        <div>
+          <label>Marca</label>
+          <input id="marcaProduto" placeholder="Marca" />
+        </div>
+        <div>
+          <label>Descrição</label>
+          <textarea id="descricaoProduto" rows="2" placeholder="Descrição"></textarea>
+        </div>
+        <div>
+          <label>Preço de venda (R$)</label>
+          <input id="precoProduto" type="number" step="0.01" min="0" />
+        </div>
+        <div>
+          <label>Estoque inicial</label>
+          <input id="estoqueInicialProduto" type="number" step="1" min="0" value="0" />
+        </div>
+      </div>
+      <div style="margin-top:8px">
+        <button class="btn" onclick="salvarProduto()">Salvar Produto</button>
+      </div>
+
+      <hr />
+
+      <h4>Produtos Cadastrados</h4>
+      <table>
+        <thead><tr><th>Nome</th><th>Marca</th><th>Preço</th><th>Estoque Atual</th><th>Ações</th></tr></thead>
+        <tbody id="tabelaProdutos"></tbody>
+      </table>
+    </section>
+
+    <!-- CLIENTES -->
+    <section id="clientes" class="card tab" style="display:none;">
+      <h3>Cadastro de Clientes</h3>
+      <div class="grid">
+        <div><label>Nome</label><input id="nomeCliente" placeholder="Nome completo" /></div>
+        <div><label>Telefone</label><input id="telefoneCliente" placeholder="(xx) xxxxx-xxxx" /></div>
+        <div><label>Email</label><input id="emailCliente" placeholder="email@exemplo.com" /></div>
+      </div>
+      <div style="margin-top:8px">
+        <button class="btn" onclick="salvarCliente()">Salvar Cliente</button>
+      </div>
+
+      <hr />
+      <h4>Clientes Cadastrados</h4>
+      <table><thead><tr><th>Nome</th><th>Telefone</th><th>Email</th><th>Ações</th></tr></thead>
+        <tbody id="tabelaClientes"></tbody></table>
+    </section>
+
+    <!-- ENTRADAS -->
+    <section id="entradas" class="card tab" style="display:none;">
+      <h3>Registrar Entrada de Material</h3>
+      <div class="grid">
+        <div><label>Produto</label><select id="selProdutoEntrada"></select></div>
+        <div><label>Data</label><input id="dataEntrada" type="date" /></div>
+        <div><label>Quantidade</label><input id="quantEntrada" type="number" step="1" min="1" /></div>
+        <div><label>Valor unitário (R$)</label><input id="valorEntrada" type="number" step="0.01" min="0" /></div>
+      </div>
+      <div style="margin-top:8px"><button class="btn" onclick="registrarEntrada()">Registrar Entrada</button></div>
+
+      <hr />
+      <h4>Histórico de Entradas</h4>
+      <table><thead><tr><th>Data</th><th>Produto</th><th>Qtd</th><th>Valor unit.</th><th>Total</th></tr></thead>
+        <tbody id="tabelaEntradas"></tbody></table>
+
+      <hr />
+      <h4>Estoque (Calculado = Inicial + Entradas - Vendas)</h4>
+      <table><thead><tr><th>Produto</th><th>Estoque Inicial</th><th>Entradas (total)</th><th>Vendas (total)</th><th>Estoque Atual</th></tr></thead>
+        <tbody id="tabelaEstoque"></tbody></table>
+    </section>
+
+    <!-- VENDAS -->
+    <section id="vendas" class="card tab" style="display:none;">
+      <h3>Registrar Venda</h3>
+      <div class="grid">
+        <div><label>Cliente</label><select id="selClienteVenda"></select></div>
+        <div><label>Produto</label><select id="selProdutoVenda"></select></div>
+        <div><label>Quantidade</label><input id="quantVenda" type="number" step="1" min="1" /></div>
+        <div><label>Forma de pagamento</label>
+          <select id="formaVenda">
+            <option value="avista">À vista</option>
+            <option value="parcelado">Parcelado</option>
+          </select>
+        </div>
+        <div><label>Observações</label><input id="obsVenda" placeholder="Opcional" /></div>
+      </div>
+
+      <!-- área de parcelas manuais -->
+      <div id="areaParcelas" style="margin-top:12px;display:none;">
+        <h4>Parcelas (informe manualmente cada parcela)</h4>
+        <div id="parcelasList"></div>
+        <div style="margin-top:8px" class="flex">
+          <button class="btn small" onclick="adicionarParcelaRow()">Adicionar parcela</button>
+          <button class="danger" onclick="limparParcelasTemp()">Limpar parcelas</button>
+        </div>
+        <div class="muted" style="margin-top:6px">Ao confirmar a venda, as parcelas serão validadas (soma deve bater com o total da venda).</div>
+      </div>
+
+      <div style="margin-top:10px">
+        <button class="btn" onclick="confirmarVenda()">Confirmar Venda</button>
+      </div>
+
+      <hr />
+      <h4>Histórico de Vendas</h4>
+      <table><thead><tr><th>Data</th><th>Cliente</th><th>Produto</th><th>Qtd</th><th>Total</th><th>Pagamento</th></tr></thead>
+        <tbody id="tabelaVendas"></tbody></table>
+    </section>
+
+    <!-- FINANCEIRO -->
+    <section id="financeiro" class="card tab" style="display:none;">
+      <div class="flex" style="justify-content:space-between;align-items:center;">
+        <h3>Contas a Receber</h3>
+        <div class="top-actions">
+          <label class="muted">Filtro:</label>
+          <select id="filtroParcelas" onchange="listarParcelas()">
+            <option value="todos">Todos</option>
+            <option value="aberto">Em aberto</option>
+            <option value="pago">Pago</option>
+          </select>
+          <select id="filtroClienteParcelas" onchange="listarParcelas()">
+            <option value="">Todos clientes</option>
+          </select>
+        </div>
+      </div>
+
+      <table><thead><tr><th>Vencimento</th><th>Cliente</th><th>Venda</th><th>Parcela</th><th>Valor</th><th>Situação</th><th>Ações</th></tr></thead>
+        <tbody id="tabelaParcelas"></tbody></table>
+
+      <div style="margin-top:8px" class="right muted">Total em aberto: R$ <span id="totalAberto">0.00</span></div>
+    </section>
+
+    <!-- BACKUP -->
+    <section id="backup" class="card tab" style="display:none;">
+      <h3>Backup e Importação</h3>
+      <div class="grid">
+        <div>
+          <button class="btn" onclick="exportarBackup()">Exportar backup (JSON)</button>
+        </div>
+        <div>
+          <label>Importar (selecionar arquivo JSON gerado no backup)</label>
+          <input type="file" id="inputImport" accept=".json" />
+          <button class="btn" onclick="importarBackup()">Importar</button>
+        </div>
+      </div>
+      <div style="margin-top:8px" class="muted">Faça backup antes de grandes testes para não perder dados.</div>
+    </section>
+  </div>
+
+  <script>
+    // ======= Dados em localStorage =======
+    let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+    let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+    let entradas = JSON.parse(localStorage.getItem('entradas')) || []; // {id,produtoId,data,quantidade,valorUnitario}
+    let vendas = JSON.parse(localStorage.getItem('vendas')) || []; // {id,clienteId,produtoId,quantidade,total,forma,obs,data}
+    let parcelas = JSON.parse(localStorage.getItem('parcelas')) || []; // {id,vendaId,clienteId,produtoId,parcelaIndex,totalParcelas,valor,vencimento,pago}
+
+    // variáveis temporárias para parcelamento manual antes de confirmar venda
+    let parcelasTemp = [];
+
+    // ======= Navegação de abas =======
+    const menuBtns = document.querySelectorAll('nav button');
+    menuBtns.forEach(btn => btn.addEventListener('click', ()=> openTab(btn.dataset.tab)));
+    function openTab(tabId){
+      document.querySelectorAll('.tab').forEach(s=>s.style.display='none');
+      document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+      const el = document.getElementById(tabId);
+      if(el) el.style.display = 'block';
+      document.querySelector(`nav button[data-tab="${tabId}"]`).classList.add('active');
+      // atualizar conteúdo dinâmico ao abrir
+      atualizarSelects();
+      listarTudo();
+      // scroll top
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    // abrir produtos por padrão
+    openTab('produtos');
+
+    // ======= Utilitários =======
+    function salvarLS(){
+      localStorage.setItem('produtos', JSON.stringify(produtos));
+      localStorage.setItem('clientes', JSON.stringify(clientes));
+      localStorage.setItem('entradas', JSON.stringify(entradas));
+      localStorage.setItem('vendas', JSON.stringify(vendas));
+      localStorage.setItem('parcelas', JSON.stringify(parcelas));
+    }
+    function gerarId(prefix='id'){ return prefix+'_'+Math.random().toString(36).slice(2,9); }
+    function escapeHtml(t){ if(t===undefined||t===null) return ''; return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function somar(array,fn){ return array.reduce((s,x)=>s+(fn(x)||0),0); }
+
+    // ======= Produtos =======
+    function salvarProduto(){
+      const nome = document.getElementById('nomeProduto').value.trim();
+      const marca = document.getElementById('marcaProduto').value.trim();
+      const desc = document.getElementById('descricaoProduto').value.trim();
+      const preco = parseFloat(document.getElementById('precoProduto').value) || 0;
+      const estoqueInicial = parseInt(document.getElementById('estoqueInicialProduto').value) || 0;
+      if(!nome){ alert('Informe o nome do produto'); return; }
+      const novo = { id: gerarId('prod'), nome, marca, descricao: desc, preco, estoqueInicial, criadoEm: new Date().toISOString() };
+      produtos.push(novo);
+      salvarLS();
+      // limpar campos
+      document.getElementById('nomeProduto').value='';
+      document.getElementById('marcaProduto').value='';
+      document.getElementById('descricaoProduto').value='';
+      document.getElementById('precoProduto').value='';
+      document.getElementById('estoqueInicialProduto').value='0';
+      atualizarSelects();
+      listarProdutos();
+      alert('Produto cadastrado');
+    }
+
+    function listarProdutos(){
+      const tbody = document.getElementById('tabelaProdutos');
+      tbody.innerHTML = '';
+      produtos.forEach(p=>{
+        const estoqueAtual = calcularEstoqueAtual(p.id);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${escapeHtml(p.nome)}</td>
+                        <td>${escapeHtml(p.marca)}</td>
+                        <td>R$ ${p.preco.toFixed(2)}</td>
+                        <td>${estoqueAtual}</td>
+                        <td>
+                          <button class="btn small" onclick="editarProduto('${p.id}')">Editar</button>
+                          <button class="danger" onclick="removerProduto('${p.id}')">Remover</button>
+                        </td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function editarProduto(id){
+      const p = produtos.find(x=>x.id===id);
+      if(!p) return;
+      const nome = prompt('Nome:', p.nome);
+      if(nome===null) return;
+      p.nome = nome.trim()||p.nome;
+      p.marca = prompt('Marca:', p.marca) || p.marca;
+      p.descricao = prompt('Descrição:', p.descricao) || p.descricao;
+      const preco = prompt('Preço (R$):', p.preco);
+      if(preco!==null && !isNaN(parseFloat(preco))) p.preco = parseFloat(preco);
+      const est = prompt('Estoque inicial:', p.estoqueInicial);
+      if(est!==null && !isNaN(parseInt(est))) p.estoqueInicial = parseInt(est);
+      salvarLS();
+      listarProdutos();
+      atualizarSelects();
+    }
+
+    function removerProduto(id){
+      if(!confirm('Remover produto?')) return;
+      produtos = produtos.filter(p=>p.id!==id);
+      // opcional: também poderia limpar entradas/vendas relacionadas
+      salvarLS();
+      listarProdutos();
+      atualizarSelects();
+    }
+
+    // ======= Clientes =======
+    function salvarCliente(){
+      const nome = document.getElementById('nomeCliente').value.trim();
+      const tel = document.getElementById('telefoneCliente').value.trim();
+      const email = document.getElementById('emailCliente').value.trim();
+      if(!nome){ alert('Informe o nome do cliente'); return; }
+      clientes.push({ id: gerarId('cli'), nome, telefone: tel, email, criadoEm: new Date().toISOString() });
+      salvarLS();
+      document.getElementById('nomeCliente').value='';
+      document.getElementById('telefoneCliente').value='';
+      document.getElementById('emailCliente').value='';
+      listarClientes();
+      atualizarSelects();
+      alert('Cliente cadastrado');
+    }
+
+    function listarClientes(){
+      const tbody = document.getElementById('tabelaClientes');
+      tbody.innerHTML = '';
+      clientes.forEach(c=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${escapeHtml(c.nome)}</td><td>${escapeHtml(c.telefone)}</td><td>${escapeHtml(c.email)}</td>
+                        <td><button class="btn small" onclick="editarCliente('${c.id}')">Editar</button>
+                            <button class="danger" onclick="removerCliente('${c.id}')">Remover</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function editarCliente(id){
+      const c = clientes.find(x=>x.id===id);
+      if(!c) return;
+      c.nome = prompt('Nome:', c.nome) || c.nome;
+      c.telefone = prompt('Telefone:', c.telefone) || c.telefone;
+      c.email = prompt('Email:', c.email) || c.email;
+      salvarLS();
+      listarClientes();
+      atualizarSelects();
+    }
+
+    function removerCliente(id){
+      if(!confirm('Remover cliente?')) return;
+      clientes = clientes.filter(c=>c.id!==id);
+      salvarLS();
+      listarClientes();
+      atualizarSelects();
+    }
+
+    // ======= Entradas =======
+    function registrarEntrada(){
+      const idx = document.getElementById('selProdutoEntrada').value;
+      const produto = produtos[idx];
+      const data = document.getElementById('dataEntrada').value;
+      const quant = parseInt(document.getElementById('quantEntrada').value) || 0;
+      const valor = parseFloat(document.getElementById('valorEntrada').value) || 0;
+      if(idx==='' || !produto || quant<=0 || !data){ alert('Preencha produto, data e quantidade corretamente'); return; }
+      const ent = { id: gerarId('ent'), produtoId: produto.id, data, quantidade: quant, valorUnitario: valor };
+      entradas.push(ent);
+      salvarLS();
+      document.getElementById('dataEntrada').value='';
+      document.getElementById('quantEntrada').value='';
+      document.getElementById('valorEntrada').value='';
+      listarEntradas();
+      listarProdutos();
+      listarEstoqueTabela();
+      atualizarSelects();
+      alert('Entrada registrada');
+    }
+
+    function listarEntradas(){
+      const tbody = document.getElementById('tabelaEntradas');
+      tbody.innerHTML = '';
+      entradas.slice().reverse().forEach(e=>{
+        const prod = produtos.find(p=>p.id===e.produtoId);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${new Date(e.data).toLocaleDateString()}</td>
+                        <td>${escapeHtml(prod?prod.nome:'-')}</td>
+                        <td>${e.quantidade}</td>
+                        <td>R$ ${e.valorUnitario.toFixed(2)}</td>
+                        <td>R$ ${(e.valorUnitario*e.quantidade).toFixed(2)}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ======= Vendas & Parcelas Manuais =======
+    // adicionar linha de input para parcela temporária
+    function adicionarParcelaRow(){
+      const cont = document.getElementById('parcelasList');
+      const idx = parcelasTemp.length + 1;
+      const div = document.createElement('div');
+      div.className = 'parcel-row';
+      div.id = `parcrow_${idx}`;
+      div.innerHTML = `
+        <input type="date" class="parc-venc" />
+        <input type="number" class="parc-valor" step="0.01" min="0" placeholder="Valor (R$)" />
+        <button class="danger" onclick="removerParcelaRow('${div.id}')">Remover</button>
+      `;
+      cont.appendChild(div);
+      parcelasTemp.push({venc:'',valor:0});
+    }
+
+    function removerParcelaRow(rowId){
+      const el = document.getElementById(rowId);
+      if(!el) return;
+      // calcular index
+      const cont = document.getElementById('parcelasList');
+      const rows = Array.from(cont.children);
+      const idx = rows.indexOf(el);
+      if(idx>=0) parcelasTemp.splice(idx,1);
+      el.remove();
+      // reindex ids
+      Array.from(cont.children).forEach((child,i)=>child.id=`parcrow_${i+1}`);
+    }
+
+    function limparParcelasTemp(){
+      parcelasTemp = [];
+      document.getElementById('parcelasList').innerHTML = '';
+    }
+
+    function confirmarVenda(){
+      const clienteIdx = document.getElementById('selClienteVenda').value;
+      const produtoIdx = document.getElementById('selProdutoVenda').value;
+      const quant = parseInt(document.getElementById('quantVenda').value) || 0;
+      const forma = document.getElementById('formaVenda').value;
+      const obs = document.getElementById('obsVenda').value.trim();
+
+      if(clienteIdx==='' || produtoIdx==='' || quant<=0){ alert('Preencha cliente, produto e quantidade'); return; }
+      const cliente = clientes[clienteIdx];
+      const produto = produtos[produtoIdx];
+      if(!cliente || !produto){ alert('Cliente/Produto inválido'); return; }
+
+      // calcular total baseado no preço do produto
+      const total = +(produto.preco * quant).toFixed(2);
+      const vendaId = gerarId('vnd');
+      const dataVenda = new Date().toISOString();
+
+      // verificar estoque
+      const estoqueAtual = calcularEstoqueAtual(produto.id);
+      if(quant > estoqueAtual){ if(!confirm(`Estoque atual é ${estoqueAtual}. Deseja registrar a venda mesmo assim?`)==true) return; }
+
+      // criar venda
+      const vendaObj = { id: vendaId, clienteId: cliente.id, produtoId: produto.id, quantidade: quant, total, forma, obs, dataVenda };
+      vendas.push(vendaObj);
+
+      // reduzir estoque? (decidimos manter entradas/vendas históricos e calcular estoque, não alterar estoqueInicial)
+      // registrar parcelas
+      if(forma === 'avista'){
+        // parcela única marcada como paga (assumimos recebimento à vista)
+        const parc = {
+          id: gerarId('parc'), vendaId, clienteId: cliente.id, produtoId: produto.id,
+          parcelaIndex: 1, totalParcelas: 1, valor: total, vencimento: dataVenda.split('T')[0], pago: true
+        };
+        parcelas.push(parc);
+        salvarLS();
+        afterVendaSuccess();
+      } else {
+        // ler parcelas manuais da UI
+        const rows = Array.from(document.querySelectorAll('#parcelasList .parcel-row'));
+        if(rows.length === 0){ alert('Adicione pelo menos 1 parcela manualmente'); return; }
+        const tempParcs = [];
+        let soma = 0;
+        for(let i=0;i<rows.length;i++){
+          const dateEl = rows[i].querySelector('.parc-venc');
+          const valEl = rows[i].querySelector('.parc-valor');
+          const venc = dateEl.value;
+          const val = parseFloat(valEl.value) || 0;
+          if(!venc){ alert(`Informe data de vencimento da parcela ${i+1}`); return; }
+          if(val<=0){ alert(`Informe valor válido para a parcela ${i+1}`); return; }
+          tempParcs.push({venc,valor:val});
+          soma += val;
+        }
+        soma = +soma.toFixed(2);
+        if(Math.abs(soma - total) > 0.009){ // permitido pequena diferença por arredondamento
+          if(!confirm(`Soma das parcelas (R$ ${soma.toFixed(2)}) difere do total da venda (R$ ${total.toFixed(2)}). Deseja continuar?`)){
+            return;
+          }
+        }
+        // criar parcelas permanentes
+        for(let i=0;i<tempParcs.length;i++){
+          parcelas.push({
+            id: gerarId('parc'),
+            vendaId,
+            clienteId: cliente.id,
+            produtoId: produto.id,
+            parcelaIndex: i+1,
+            totalParcelas: tempParcs.length,
+            valor: +tempParcs[i].valor.toFixed(2),
+            vencimento: tempParcs[i].venc,
+            pago:false
+          });
+        }
+        salvarLS();
+        afterVendaSuccess();
+      }
+    }
+
+    function afterVendaSuccess(){
+      // limpar campos venda & temp parcelas
+      document.getElementById('quantVenda').value='';
+      document.getElementById('obsVenda').value='';
+      limparParcelasTemp();
+      listarVendas();
+      listarParcelas();
+      listarEstoqueTabela();
+      atualizarSelects();
+      alert('Venda registrada com sucesso');
+    }
+
+    function listarVendas(){
+      const tbody = document.getElementById('tabelaVendas');
+      tbody.innerHTML = '';
+      vendas.slice().reverse().forEach(v=>{
+        const cli = clientes.find(c=>c.id===v.clienteId);
+        const prod = produtos.find(p=>p.id===v.produtoId);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${new Date(v.dataVenda).toLocaleString()}</td>
+                        <td>${escapeHtml(cli?cli.nome:'-')}</td>
+                        <td>${escapeHtml(prod?prod.nome:'-')}</td>
+                        <td>${v.quantidade}</td>
+                        <td>R$ ${v.total.toFixed(2)}</td>
+                        <td>${v.forma}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ======= FINANCEIRO (parcelas) =======
+    function listarParcelas(){
+      const filtro = document.getElementById('filtroParcelas').value;
+      const filtroCliente = document.getElementById('filtroClienteParcelas').value;
+      const tbody = document.getElementById('tabelaParcelas');
+      tbody.innerHTML = '';
+      let lista = parcelas.slice().sort((a,b)=>new Date(a.vencimento)-new Date(b.vencimento));
+      if(filtro==='aberto') lista = lista.filter(p=>!p.pago);
+      if(filtro==='pago') lista = lista.filter(p=>p.pago);
+      if(filtroCliente) lista = lista.filter(p=>p.clienteId===filtroCliente);
+      let totalAberto = 0;
+      lista.forEach(p=>{
+        if(!p.pago) totalAberto += p.valor;
+        const cli = clientes.find(c=>c.id===p.clienteId);
+        const venda = vendas.find(v=>v.id===p.vendaId);
+        const prod = produtos.find(pp=>pp.id===p.produtoId);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${new Date(p.vencimento).toLocaleDateString()}</td>
+                        <td>${escapeHtml(cli?cli.nome:'-')}</td>
+                        <td>${escapeHtml(prod?prod.nome:'-')}</td>
+                        <td>${p.parcelaIndex}/${p.totalParcelas}</td>
+                        <td>R$ ${p.valor.toFixed(2)}</td>
+                        <td>${p.pago ? 'Pago' : 'Em aberto'}</td>
+                        <td>
+                          ${p.pago ? '' : `<button class="btn small" onclick="marcarParcelaPago('${p.id}')">Marcar pago</button>`}
+                          <button class="danger" onclick="removerParcela('${p.id}')">Remover</button>
+                        </td>`;
+        tbody.appendChild(tr);
+      });
+      document.getElementById('totalAberto').innerText = totalAberto.toFixed(2);
+      // popular filtro de cliente
+      const selCli = document.getElementById('filtroClienteParcelas');
+      selCli.innerHTML = '<option value="">Todos clientes</option>';
+      clientes.forEach(c=> selCli.innerHTML += `<option value="${c.id}">${escapeHtml(c.nome)}</option>`);
+    }
+
+    function marcarParcelaPago(id){
+      const p = parcelas.find(x=>x.id===id);
+      if(!p) return;
+      if(!confirm(`Marcar parcela R$ ${p.valor.toFixed(2)} como paga?`)) return;
+      p.pago = true;
+      p.dataPagamento = new Date().toISOString();
+      salvarLS();
+      listarParcelas();
+      alert('Parcela marcada como paga');
+    }
+
+    function removerParcela(id){
+      if(!confirm('Remover parcela?')) return;
+      parcelas = parcelas.filter(p=>p.id!==id);
+      salvarLS();
+      listarParcelas();
+    }
+
+    // ======= ESTOQUE (cálculo) =======
+    function calcularEstoqueAtual(produtoId){
+      const produto = produtos.find(p=>p.id===produtoId);
+      if(!produto) return 0;
+      const inicial = Number(produto.estoqueInicial||0);
+      const totalEntradas = somar(entradas.filter(e=>e.produtoId===produtoId), x=>x.quantidade);
+      const totalVendas = somar(vendas.filter(v=>v.produtoId===produtoId), x=>x.quantidade);
+      return inicial + totalEntradas - totalVendas;
+    }
+
+    function listarEstoqueTabela(){
+      const tbody = document.getElementById('tabelaEstoque');
+      tbody.innerHTML = '';
+      produtos.forEach(p=>{
+        const inicial = Number(p.estoqueInicial||0);
+        const entradasTot = somar(entradas.filter(e=>e.produtoId===p.id), x=>x.quantidade);
+        const vendasTot = somar(vendas.filter(v=>v.produtoId===p.id), x=>x.quantidade);
+        const atual = calcularEstoqueAtual(p.id);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${escapeHtml(p.nome)}</td>
+                        <td>${inicial}</td>
+                        <td>${entradasTot}</td>
+                        <td>${vendasTot}</td>
+                        <td>${atual}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ======= SELECTS & Atualizações =======
+    function atualizarSelects(){
+      // produtos select (entrada + venda)
+      const selE = document.getElementById('selProdutoEntrada');
+      const selV = document.getElementById('selProdutoVenda');
+      selE.innerHTML = '<option value="">-- selecione --</option>';
+      selV.innerHTML = '<option value="">-- selecione --</option>';
+      produtos.forEach((p,i)=> {
+        selE.innerHTML += `<option value="${i}">${escapeHtml(p.nome)} (Est: ${calcularEstoqueAtual(p.id)})</option>`;
+        selV.innerHTML += `<option value="${i}">${escapeHtml(p.nome)} — R$ ${p.preco.toFixed(2)} (Est: ${calcularEstoqueAtual(p.id)})</option>`;
+      });
+
+      // clientes select (venda)
+      const selC = document.getElementById('selClienteVenda');
+      selC.innerHTML = '<option value="">-- selecione --</option>';
+      clientes.forEach((c,i)=> selC.innerHTML += `<option value="${i}">${escapeHtml(c.nome)}</option>`);
+    }
+
+    // ======= BACKUP / IMPORT =======
+    function exportarBackup(){
+      const data = { produtos, clientes, entradas, vendas, parcelas, criadoEm: new Date().toISOString() };
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup_suri_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importarBackup(){
+      const file = document.getElementById('inputImport').files[0];
+      if(!file){ alert('Escolha um arquivo JSON'); return; }
+      const reader = new FileReader();
+      reader.onload = function(e){
+        try{
+          const data = JSON.parse(e.target.result);
+          if(!confirm('Importar irá substituir os dados atuais. Deseja continuar?')) return;
+          produtos = data.produtos || [];
+          clientes = data.clientes || [];
+          entradas = data.entradas || [];
+          vendas = data.vendas || [];
+          parcelas = data.parcelas || [];
+          salvarLS();
+          listarTudo();
+          atualizarSelects();
+          alert('Importação concluída');
+        }catch(err){
+          alert('Arquivo inválido: '+err.message);
+        }
+      }
+      reader.readAsText(file);
+    }
+
+    // ======= Helpers para listar tudo =======
+    function listarEntradas(){ listarEntradas(); } // placeholder (já existe)
+    function listarTudo(){
+      listarProdutos();
+      listarClientes();
+      listarEntradas();
+      listarVendas();
+      listarParcelas();
+      listarEstoqueTabela();
+    }
+
+    // small fix: earlier function name collision; rename listarEntradasReal
+    function listarEntradas(){
+      const tbody = document.getElementById('tabelaEntradas');
+      tbody.innerHTML = '';
+      entradas.slice().reverse().forEach(e=>{
+        const prod = produtos.find(p=>p.id===e.produtoId);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${new Date(e.data).toLocaleDateString()}</td>
+                        <td>${escapeHtml(prod?prod.nome:'-')}</td>
+                        <td>${e.quantidade}</td>
+                        <td>R$ ${Number(e.valorUnitario||0).toFixed(2)}</td>
+                        <td>R$ ${(Number(e.valorUnitario||0)*e.quantidade).toFixed(2)}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // inicialização UI
+    atualizarSelects();
+    listarTudo();
+
+    // evento para exibir área de parcelas quando selecionado parcelado
+    document.getElementById('formaVenda').addEventListener('change', function(){
+      const val = this.value;
+      document.getElementById('areaParcelas').style.display = (val==='parcelado') ? 'block' : 'none';
+      if(val!=='parcelado') limparParcelasTemp();
+    });
+
+    // event delegation: quando adicionar linhas de parcela, os inputs precisam atualizar parcelasTemp when saving -> we read inputs directly when confirming sale
+
+    // fim do script
+  </script>
+</body>
+</html>
