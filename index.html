@@ -1,0 +1,325 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Suri Cosméticos</title>
+<style>
+body { font-family: Arial; background: #ffe6f0; margin:0; padding:0; }
+header { background: #f06292; color:#fff; padding:15px; text-align:center; font-size:24px; font-weight:bold; }
+nav { display:flex; justify-content:center; gap:8px; margin:15px 0; }
+nav button { padding:8px 14px; border:1px solid #f06292; background:#fff; color:#f06292; border-radius:5px; cursor:pointer; font-weight:bold; }
+nav button.ativo, nav button:hover { background:#f06292; color:#fff; }
+.aba { display:none; padding:20px; }
+.ativa { display:block; }
+table { width:100%; border-collapse: collapse; margin-top:10px; }
+th, td { border:1px solid #f06292; padding:6px; text-align:center; }
+th { background:#f48fb1; color:#fff; }
+input, textarea, select { width:100%; padding:6px; margin:4px 0; border:1px solid #ccc; border-radius:5px; }
+button.salvar { background:#f06292; color:#fff; border:none; padding:8px 14px; border-radius:5px; cursor:pointer; margin-top:8px; }
+button.salvar:hover { background:#ec407a; }
+.total { font-weight:bold; margin-top:10px; color:#880e4f; }
+.parcelasInput { margin-bottom: 5px; }
+</style>
+</head>
+<body>
+<header>Suri Cosméticos</header>
+<nav>
+<button onclick="mostrarAba('produtos', this)">Produtos</button>
+<button onclick="mostrarAba('clientes', this)">Clientes</button>
+<button onclick="mostrarAba('entradas', this)">Entradas</button>
+<button onclick="mostrarAba('vendas', this)">Vendas</button>
+<button onclick="mostrarAba('financeiro', this)">Financeiro</button>
+</nav>
+
+<!-- Produtos -->
+<div id="produtos" class="aba ativa">
+<h2>Cadastro de Produtos</h2>
+<input id="nomeProduto" placeholder="Nome">
+<textarea id="descricaoProduto" placeholder="Descrição"></textarea>
+<input type="text" id="marcaProduto" placeholder="Marca">
+<button class="salvar" onclick="salvarProduto()">Salvar</button>
+<h3>Lista de Produtos</h3>
+<table>
+<thead><tr><th>Nome</th><th>Descrição</th><th>Marca</th><th>Estoque</th><th>Ações</th></tr></thead>
+<tbody id="listaProdutos"></tbody>
+</table>
+</div>
+
+<!-- Clientes -->
+<div id="clientes" class="aba">
+<h2>Cadastro de Clientes</h2>
+<input id="nomeCliente" placeholder="Nome">
+<input id="telefoneCliente" placeholder="Telefone">
+<input type="email" id="emailCliente" placeholder="Email">
+<button class="salvar" onclick="salvarCliente()">Salvar</button>
+<h3>Lista de Clientes</h3>
+<table>
+<thead><tr><th>Nome</th><th>Telefone</th><th>Email</th><th>Ações</th></tr></thead>
+<tbody id="listaClientes"></tbody>
+</table>
+</div>
+
+<!-- Entradas -->
+<div id="entradas" class="aba">
+<h2>Entrada de Material</h2>
+<select id="produtoEntrada"></select>
+<input type="number" id="quantidadeEntrada" placeholder="Quantidade">
+<input type="number" id="valorEntrada" placeholder="Valor unitário">
+<input type="date" id="dataEntrada">
+<button class="salvar" onclick="salvarEntrada()">Registrar Entrada</button>
+<h3>Histórico de Entradas</h3>
+<table>
+<thead><tr><th>Produto</th><th>Qtd</th><th>Valor Unitário</th><th>Data</th><th>Ações</th></tr></thead>
+<tbody id="listaEntradas"></tbody>
+</table>
+</div>
+
+<!-- Vendas -->
+<div id="vendas" class="aba">
+<h2>Registrar Venda</h2>
+<select id="clienteVenda"></select>
+<select id="produtoVenda"></select>
+<input type="number" id="quantidadeVenda" placeholder="Quantidade">
+<input type="number" id="valorVenda" placeholder="Valor unitário (opcional)">
+<select id="tipoPagamento" onchange="toggleParcelas()">
+<option value="avista">À vista</option>
+<option value="parcelado">Parcelado</option>
+</select>
+<div id="parcelasDiv" style="display:none;">
+<input type="number" id="numParcelas" placeholder="Número de parcelas" min="1" onchange="gerarParcelas()">
+<div id="parcelasContainer"></div>
+</div>
+<button class="salvar" onclick="registrarVenda()">Registrar Venda</button>
+<h3>Histórico de Vendas</h3>
+<table>
+<thead><tr><th>Cliente</th><th>Produto</th><th>Qtd</th><th>Valor Unit.</th><th>Valor Total</th><th>Tipo</th><th>Parcelas</th><th>Ações</th></tr></thead>
+<tbody id="listaVendas"></tbody>
+</table>
+</div>
+
+<!-- Financeiro -->
+<div id="financeiro" class="aba">
+<h2>Financeiro</h2>
+<label>Filtrar por Status:</label>
+<select id="filtroFinanceiro" onchange="listarFinanceiro()">
+<option value="">Todos</option>
+<option value="Pendente">Pendentes</option>
+<option value="Pago">Recebidos</option>
+</select>
+<table>
+<thead><tr><th>Cliente</th><th>Produto</th><th>Qtd</th><th>Parcela</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Ações</th></tr></thead>
+<tbody id="listaFinanceiro"></tbody>
+</table>
+</div>
+
+<script>
+// --- Dados ---
+let produtos = JSON.parse(localStorage.getItem("produtos"))||[];
+let clientes = JSON.parse(localStorage.getItem("clientes"))||[];
+let entradas = JSON.parse(localStorage.getItem("entradas"))||[];
+let vendas = JSON.parse(localStorage.getItem("vendas"))||[];
+const senhaExclusao="1234";
+
+// --- Navegação ---
+function mostrarAba(aba, botao){
+document.querySelectorAll(".aba").forEach(d=>d.classList.remove("ativa"));
+document.getElementById(aba).classList.add("ativa");
+document.querySelectorAll("nav button").forEach(b=>b.classList.remove("ativo"));
+botao.classList.add("ativo");
+atualizarSelects();
+listarProdutos(); listarClientes(); listarEntradas(); listarVendas(); listarFinanceiro();
+}
+
+// ---------- Produtos ----------
+function salvarProduto(){
+const nome=document.getElementById("nomeProduto").value;
+const desc=document.getElementById("descricaoProduto").value;
+const marca=document.getElementById("marcaProduto").value;
+if(nome){
+produtos.push({nome,desc,marca,estoque:0});
+localStorage.setItem("produtos",JSON.stringify(produtos));
+document.getElementById("nomeProduto").value=""; document.getElementById("descricaoProduto").value=""; document.getElementById("marcaProduto").value="";
+listarProdutos(); atualizarSelects();
+}
+}
+function listarProdutos(){
+const tb=document.getElementById("listaProdutos"); tb.innerHTML="";
+produtos.forEach((p,i)=>{
+tb.innerHTML+=`<tr>
+<td>${p.nome}</td><td>${p.desc}</td><td>${p.marca}</td><td>${p.estoque}</td>
+<td><button onclick="editarProduto(${i})">Alterar</button>
+<button onclick="excluirProduto(${i})">Excluir</button></td></tr>`;
+});
+}
+function editarProduto(i){
+if(prompt("Senha para alterar?")==senhaExclusao){
+const p=produtos[i];
+const novoNome=prompt("Nome:",p.nome);
+const novaDesc=prompt("Descrição:",p.desc);
+const novaMarca=prompt("Marca:",p.marca);
+if(novoNome && novaDesc && novaMarca){
+produtos[i]={nome:novoNome,desc:novaDesc,marca:novaMarca,estoque:p.estoque};
+localStorage.setItem("produtos",JSON.stringify(produtos));
+listarProdutos(); atualizarSelects();
+}}else alert("Senha incorreta");
+}
+function excluirProduto(i){if(prompt("Senha para excluir?")===senhaExclusao){produtos.splice(i,1); localStorage.setItem("produtos",JSON.stringify(produtos)); listarProdutos(); atualizarSelects();}}
+
+// ---------- Clientes ----------
+function salvarCliente(){
+const nome=document.getElementById("nomeCliente").value;
+const tel=document.getElementById("telefoneCliente").value;
+const email=document.getElementById("emailCliente").value;
+if(nome){
+clientes.push({nome,tel,email});
+localStorage.setItem("clientes",JSON.stringify(clientes));
+document.getElementById("nomeCliente").value=""; document.getElementById("telefoneCliente").value=""; document.getElementById("emailCliente").value="";
+listarClientes(); atualizarSelects();
+}
+}
+function listarClientes(){
+const tb=document.getElementById("listaClientes"); tb.innerHTML="";
+clientes.forEach((c,i)=>{
+tb.innerHTML+=`<tr>
+<td>${c.nome}</td><td>${c.tel}</td><td>${c.email}</td>
+<td><button onclick="editarCliente(${i})">Alterar</button>
+<button onclick="excluirCliente(${i})">Excluir</button></td></tr>`;
+});
+}
+function editarCliente(i){
+if(prompt("Senha para alterar?")==senhaExclusao){
+const c=clientes[i];
+const novoNome=prompt("Nome:",c.nome);
+const novoTel=prompt("Telefone:",c.tel);
+const novoEmail=prompt("Email:",c.email);
+if(novoNome && novoTel && novoEmail){
+clientes[i]={nome:novoNome,tel:novoTel,email:novoEmail};
+localStorage.setItem("clientes",JSON.stringify(clientes));
+listarClientes(); atualizarSelects();
+}}else alert("Senha incorreta");
+}
+function excluirCliente(i){if(prompt("Senha para excluir?")===senhaExclusao){clientes.splice(i,1); localStorage.setItem("clientes",JSON.stringify(clientes)); listarClientes(); atualizarSelects();}}
+
+// ---------- Entradas ----------
+function salvarEntrada(){
+const pIndex=document.getElementById("produtoEntrada").value;
+const qtd=parseInt(document.getElementById("quantidadeEntrada").value);
+const val=parseFloat(document.getElementById("valorEntrada").value);
+const data=document.getElementById("dataEntrada").value;
+if(pIndex!=="" && qtd>0 && val>0 && data){
+entradas.push({produto:produtos[pIndex].nome,qtd,val,data});
+produtos[pIndex].estoque+=qtd;
+localStorage.setItem("entradas",JSON.stringify(entradas));
+localStorage.setItem("produtos",JSON.stringify(produtos));
+document.getElementById("quantidadeEntrada").value=""; document.getElementById("valorEntrada").value=""; document.getElementById("dataEntrada").value="";
+listarEntradas(); listarProdutos();
+}
+}
+function listarEntradas(){
+const tb=document.getElementById("listaEntradas"); tb.innerHTML="";
+entradas.forEach((e,i)=>{
+tb.innerHTML+=`<tr>
+<td>${e.produto}</td><td>${e.qtd}</td><td>${e.val.toFixed(2)}</td><td>${e.data}</td>
+<td><button onclick="editarEntrada(${i})">Alterar</button><button onclick="excluirEntrada(${i})">Excluir</button></td>
+</tr>`;
+});
+}
+function editarEntrada(i){
+if(prompt("Senha para alterar?")==senhaExclusao){
+const e=entradas[i];
+const novaQtd=parseInt(prompt("Quantidade:",e.qtd));
+const novoVal=parseFloat(prompt("Valor unitário:",e.val));
+const novaData=prompt("Data:",e.data);
+if(!isNaN(novaQtd) && !isNaN(novoVal) && novaData){
+produtos.find(p=>p.nome==e.produto).estoque-=e.qtd;
+produtos.find(p=>p.nome==e.produto).estoque+=novaQtd;
+entradas[i]={produto:e.produto,qtd:novaQtd,val:novoVal,data:novaData};
+localStorage.setItem("entradas",JSON.stringify(entradas));
+localStorage.setItem("produtos",JSON.stringify(produtos));
+listarEntradas(); listarProdutos();
+}}else alert("Senha incorreta");
+}
+function excluirEntrada(i){if(prompt("Senha para excluir?")===senhaExclusao){produtos.find(p=>p.nome==entradas[i].produto).estoque-=entradas[i].qtd; entradas.splice(i,1); localStorage.setItem("entradas",JSON.stringify(entradas)); localStorage.setItem("produtos",JSON.stringify(produtos)); listarEntradas();}}
+
+// ---------- Vendas ----------
+function toggleParcelas(){document.getElementById("parcelasDiv").style.display=document.getElementById("tipoPagamento").value==="parcelado"?"block":"none";}
+function gerarParcelas(){
+const container=document.getElementById("parcelasContainer");
+container.innerHTML="";
+const n=parseInt(document.getElementById("numParcelas").value);
+for(let i=0;i<n;i++){
+container.innerHTML+=`<div class="parcelasInput">Parcela ${i+1}: <input type="number" placeholder="Valor" class="valorParcela"> <input type="date" class="dataParcela"></div>`;
+}}
+function registrarVenda(){
+const cIndex=document.getElementById("clienteVenda").value;
+const pIndex=document.getElementById("produtoVenda").value;
+const qtd=parseInt(document.getElementById("quantidadeVenda").value);
+let val=parseFloat(document.getElementById("valorVenda").value);
+if(pIndex!=="" && cIndex!=="" && qtd>0){
+if(isNaN(val)) val=produtos[pIndex].estoque>0?produtos[pIndex].valor||0:0;
+if(produtos[pIndex].estoque<qtd){alert("Estoque insuficiente!"); return;}
+produtos[pIndex].estoque-=qtd;
+let tipo=document.getElementById("tipoPagamento").value;
+let parcelas=[];
+if(tipo==="parcelado"){
+document.querySelectorAll("#parcelasContainer .parcelasInput").forEach(p=>{
+let v=parseFloat(p.querySelector(".valorParcela").value);
+let d=p.querySelector(".dataParcela").value;
+if(!isNaN(v) && d) parcelas.push({valor:v,data:d,status:"Pendente"});
+});
+}
+vendas.push({cliente:clientes[cIndex].nome,produto:produtos[pIndex].nome,qtd,valorUnit:val,total:val*qtd,tipo,parcelas});
+localStorage.setItem("vendas",JSON.stringify(vendas));
+localStorage.setItem("produtos",JSON.stringify(produtos));
+document.getElementById("quantidadeVenda").value=""; document.getElementById("valorVenda").value=""; document.getElementById("numParcelas").value=""; document.getElementById("parcelasContainer").innerHTML="";
+listarProdutos(); listarVendas(); listarFinanceiro();
+}
+}
+function listarVendas(){
+const tb=document.getElementById("listaVendas"); tb.innerHTML="";
+vendas.forEach((v,i)=>{
+let parcelasStr=v.parcelas?v.parcelas.map((p,j)=>`P${j+1}:${p.valor}(${p.status})`).join(" | "):"";
+tb.innerHTML+=`<tr>
+<td>${v.cliente}</td><td>${v.produto}</td><td>${v.qtd}</td><td>${v.valorUnit.toFixed(2)}</td>
+<td>${v.total.toFixed(2)}</td><td>${v.tipo}</td><td>${parcelasStr}</td>
+<td><button onclick="excluirVenda(${i})">Excluir</button></td>
+</tr>`;
+});
+}
+function excluirVenda(i){if(prompt("Senha para excluir?")===senhaExclusao){vendas.splice(i,1); localStorage.setItem("vendas",JSON.stringify(vendas)); listarVendas(); listarFinanceiro();}}
+
+// ---------- Financeiro ----------
+function listarFinanceiro(){
+const filtro=document.getElementById("filtroFinanceiro").value;
+const tb=document.getElementById("listaFinanceiro"); tb.innerHTML="";
+vendas.forEach((v,i)=>{
+if(v.parcelas){
+v.parcelas.forEach((p,j)=>{
+if(filtro=="" || p.status===filtro){
+tb.innerHTML+=`<tr>
+<td>${v.cliente}</td><td>${v.produto}</td><td>${v.qtd}</td><td>${j+1}</td><td>${p.valor.toFixed(2)}</td><td>${p.data}</td>
+<td>${p.status}</td>
+<td><button onclick="baixarParcela(${i},${j})">Receber</button></td>
+</tr>`;
+}
+});
+}
+});
+}
+function baixarParcela(i,j){if(prompt("Senha para baixar?")===senhaExclusao){vendas[i].parcelas[j].status="Pago"; localStorage.setItem("vendas",JSON.stringify(vendas)); listarFinanceiro(); listarVendas();}}
+
+// ---------- Selects ----------
+function atualizarSelects(){
+const selProdutoEntrada=document.getElementById("produtoEntrada");
+const selProdutoVenda=document.getElementById("produtoVenda");
+const selClienteVenda=document.getElementById("clienteVenda");
+selProdutoEntrada.innerHTML=""; selProdutoVenda.innerHTML=""; selClienteVenda.innerHTML="";
+produtos.forEach((p,i)=>{selProdutoEntrada.innerHTML+=`<option value="${i}">${p.nome}</option>`; selProdutoVenda.innerHTML+=`<option value="${i}">${p.nome}</option>`;});
+clientes.forEach((c,i)=>{selClienteVenda.innerHTML+=`<option value="${i}">${c.nome}</option>`;});
+}
+
+// Inicializar
+mostrarAba('produtos',document.querySelector("nav button"));
+</script>
+</body>
+</html>
