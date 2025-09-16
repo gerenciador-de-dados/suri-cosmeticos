@@ -1,0 +1,730 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Suri Cosméticos — Gestão (Corrigido)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f8c8dc; margin: 0; padding: 0; }
+    header { background-color: #f06292; padding: 14px; text-align: center; color: white; font-size: 22px; font-weight: bold; }
+    nav { text-align: center; margin: 12px; }
+    nav button { margin: 0 8px; padding: 8px 14px; background-color: white; border: 1px solid #f06292; border-radius: 6px; cursor: pointer; font-weight: bold; color: #f06292; }
+    nav button:hover { background-color: #f06292; color: white; }
+    nav button.active { background-color: #c2185b; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.12); }
+    .aba { display: none; padding: 16px; max-width: 1100px; margin: 0 auto 40px; }
+    .ativa { display: block; }
+    section.card { background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); margin-bottom: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 10px; align-items: start; }
+    input, textarea, select { width: 100%; padding: 8px; margin: 6px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 14px; }
+    th, td { border: 1px solid #f06292; padding: 8px; text-align: left; vertical-align: middle; }
+    th { background-color: #f48fb1; color: white; }
+    button.salvar { background-color: #f06292; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+    button.salvar:hover { background-color: #ec407a; }
+    .btn-small { padding:6px 8px; font-size:13px; border-radius:6px; margin-left:6px; }
+    .muted { color: #666; font-size: 13px; }
+    .right { text-align: right; }
+    .parcelas-list { margin-top: 8px; border: 1px dashed #eee; padding: 8px; border-radius: 6px; }
+    .small { font-size: 13px; padding: 6px 8px; }
+  </style>
+</head>
+<body>
+  <header>Suri Cosméticos — Gestão</header>
+
+  <nav id="menuTopo">
+    <button data-aba="produtos">Produtos</button>
+    <button data-aba="clientes">Clientes</button>
+    <button data-aba="entradas">Entradas</button>
+    <button data-aba="vendas">Vendas</button>
+    <button data-aba="financeiro">Financeiro</button>
+  </nav>
+
+  <!-- PRODUTOS -->
+  <div id="produtos" class="aba ativa">
+    <section class="card">
+      <h3>Cadastro de Produtos</h3>
+      <div class="grid">
+        <div>
+          <input type="text" id="nomeProduto" placeholder="Nome do produto">
+          <input type="text" id="marcaProduto" placeholder="Marca">
+        </div>
+        <div>
+          <textarea id="descricaoProduto" rows="3" placeholder="Descrição"></textarea>
+        </div>
+        <div>
+          <input type="number" id="precoProduto" placeholder="Preço de venda (R$)" step="0.01" min="0">
+          <input type="number" id="estoqueProduto" placeholder="Estoque inicial" step="1" min="0">
+        </div>
+      </div>
+      <button class="salvar" onclick="salvarProduto()">Salvar Produto</button>
+    </section>
+
+    <section class="card">
+      <h3>Lista de Produtos</h3>
+      <table>
+        <thead>
+          <tr><th>Nome</th><th>Marca</th><th>Preço</th><th>Estoque</th><th>Entrada</th><th>Ações</th></tr>
+        </thead>
+        <tbody id="listaProdutos"></tbody>
+      </table>
+    </section>
+  </div>
+
+  <!-- CLIENTES -->
+  <div id="clientes" class="aba">
+    <section class="card">
+      <h3>Cadastro de Clientes</h3>
+      <div class="grid">
+        <div><input type="text" id="nomeCliente" placeholder="Nome completo"></div>
+        <div><input type="text" id="telefoneCliente" placeholder="Telefone"></div>
+        <div><input type="email" id="emailCliente" placeholder="Email"></div>
+      </div>
+      <button class="salvar" onclick="salvarCliente()">Salvar Cliente</button>
+    </section>
+
+    <section class="card">
+      <h3>Lista de Clientes</h3>
+      <table>
+        <thead><tr><th>Nome</th><th>Telefone</th><th>Email</th><th>Ações</th></tr></thead>
+        <tbody id="listaClientes"></tbody>
+      </table>
+    </section>
+  </div>
+
+  <!-- ENTRADAS -->
+  <div id="entradas" class="aba">
+    <section class="card">
+      <h3>Registrar Entrada de Material</h3>
+      <div class="grid">
+        <div>
+          <label>Produto</label>
+          <select id="entradaProduto"></select>
+        </div>
+        <div>
+          <label>Data da entrada</label>
+          <input type="date" id="entradaData">
+        </div>
+        <div>
+          <label>Quantidade</label>
+          <input type="number" id="entradaQuantidade" step="1" min="1">
+        </div>
+        <div>
+          <label>Valor unitário (R$)</label>
+          <input type="number" id="entradaValor" step="0.01" min="0">
+        </div>
+      </div>
+      <div style="margin-top:8px;">
+        <button class="salvar" onclick="registrarEntrada()">Registrar Entrada (aumenta estoque)</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Histórico de Entradas</h3>
+      <table>
+        <thead><tr><th>Data</th><th>Produto</th><th>Quantidade</th><th>Valor unit.</th><th>Total</th></tr></thead>
+        <tbody id="listaEntradas"></tbody>
+      </table>
+    </section>
+  </div>
+
+  <!-- VENDAS -->
+  <div id="vendas" class="aba">
+    <section class="card">
+      <h3>Registrar Venda</h3>
+      <div class="grid">
+        <div>
+          <label>Cliente</label>
+          <select id="vendaCliente"></select>
+        </div>
+        <div>
+          <label>Produto</label>
+          <select id="vendaProduto"></select>
+        </div>
+        <div>
+          <label>Quantidade</label>
+          <input type="number" id="vendaQuantidade" step="1" min="1">
+        </div>
+        <div>
+          <label>Forma de pagamento</label>
+          <select id="vendaForma">
+            <option value="avista">À vista</option>
+            <option value="parcelado">Parcelado</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="parcelamentoArea" style="margin-top:10px; display:none;">
+        <div class="grid">
+          <div>
+            <label>N° de parcelas</label>
+            <input type="number" id="numParcelas" min="2" max="48" value="2">
+          </div>
+          <div>
+            <label>Primeira data de vencimento</label>
+            <input type="date" id="primeiraVenc">
+          </div>
+          <div style="align-self:end;">
+            <button class="salvar" onclick="gerarParcelasPreview()">Gerar parcelas (editar antes de salvar)</button>
+          </div>
+        </div>
+
+        <div id="previewParcelas" class="parcelas-list" style="display:none;"></div>
+      </div>
+
+      <div style="margin-top:8px;">
+        <button class="salvar" onclick="registrarVenda()">Registrar Venda</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Histórico de Vendas</h3>
+      <table>
+        <thead><tr><th>Data</th><th>Cliente</th><th>Produto</th><th>Qtd</th><th>Total</th><th>Pagamento</th></tr></thead>
+        <tbody id="listaVendas"></tbody>
+      </table>
+    </section>
+  </div>
+
+  <!-- FINANCEIRO -->
+  <div id="financeiro" class="aba">
+    <section class="card">
+      <h3>Contas a Receber</h3>
+      <div class="grid">
+        <div>
+          <label>Filtro situação</label>
+          <select id="filtroSituacao" onchange="listarParcelas()">
+            <option value="todos">Todos</option>
+            <option value="aberto">Em aberto</option>
+            <option value="pago">Pago</option>
+          </select>
+        </div>
+        <div>
+          <label>Filtro por cliente</label>
+          <select id="filtroCliente" onchange="listarParcelas()">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div class="right small muted">Saldo em aberto: R$ <span id="saldoAberto">0.00</span></div>
+      </div>
+      <table>
+        <thead><tr><th>Vencimento</th><th>Cliente</th><th>Venda</th><th>Parcela</th><th>Valor</th><th>Situação</th><th>Ações</th></tr></thead>
+        <tbody id="listaParcelas"></tbody>
+      </table>
+    </section>
+  </div>
+
+  <script>
+    // Dados (localStorage)
+    let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+    let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+    let entradas = JSON.parse(localStorage.getItem('entradas')) || [];
+    let vendas = JSON.parse(localStorage.getItem('vendas')) || [];
+    let parcelas = JSON.parse(localStorage.getItem('parcelas')) || [];
+
+    const senhaExclusao = "1234";
+
+    // ---------- NAV / ABA ATIVA ----------
+    const btnsNav = document.querySelectorAll('#menuTopo button');
+    btnsNav.forEach(btn => btn.addEventListener('click', function(){
+      const aba = this.getAttribute('data-aba');
+      abrirAba(aba, this);
+    }));
+
+    function abrirAba(abaId, botao = null) {
+      // mostrar aba
+      document.querySelectorAll('.aba').forEach(d => d.classList.remove('ativa'));
+      const aba = document.getElementById(abaId);
+      if (aba) aba.classList.add('ativa');
+      // destacar botão
+      btnsNav.forEach(b => b.classList.remove('active'));
+      if (botao) botao.classList.add('active');
+      else {
+        const btn = document.querySelector(`#menuTopo button[data-aba="${abaId}"]`);
+        if (btn) btn.classList.add('active');
+      }
+      // atualizar conteúdo
+      listarProdutos();
+      listarClientes();
+      atualizarSelects();
+      listarEntradas();
+      listarVendas();
+      listarParcelas();
+      // rolar pro topo da aba (útil no mobile)
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // abrir aba inicial e destacar o botão correspondente
+    document.addEventListener('DOMContentLoaded', () => {
+      abrirAba('produtos');
+    });
+
+    // ---------- PRODUTOS ----------
+    function salvarProduto() {
+      const nome = document.getElementById('nomeProduto').value.trim();
+      const marca = document.getElementById('marcaProduto').value.trim();
+      const descricao = document.getElementById('descricaoProduto').value.trim();
+      const preco = parseFloat(document.getElementById('precoProduto').value) || 0;
+      const estoque = parseInt(document.getElementById('estoqueProduto').value) || 0;
+
+      if (!nome) { alert('Preencha o nome do produto'); return; }
+
+      const novo = { id: gerarId('prod'), nome, marca, descricao, preco, estoque, criadoEm: new Date().toISOString() };
+      produtos.push(novo);
+      salvarLS();
+      limparCamposProduto();
+      listarProdutos();
+      atualizarSelects();
+      alert('Produto cadastrado com sucesso');
+    }
+
+    function listarProdutos() {
+      const tbody = document.getElementById('listaProdutos');
+      tbody.innerHTML = '';
+      produtos.forEach((p, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${escapeHtml(p.nome)}</td>
+                        <td>${escapeHtml(p.marca)}</td>
+                        <td>R$ ${parseFloat(p.preco).toFixed(2)}</td>
+                        <td>${p.estoque}</td>
+                        <td>${new Date(p.criadoEm).toLocaleDateString()}</td>
+                        <td>
+                          <button class="btn-small" onclick="editarProduto('${p.id}')">Editar</button>
+                          <button class="btn-small" onclick="removerProduto('${p.id}')">Remover</button>
+                        </td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function editarProduto(id) {
+      const p = produtos.find(x => x.id === id);
+      if (!p) return;
+      const novoNome = prompt('Nome:', p.nome);
+      if (novoNome === null) return;
+      p.nome = novoNome.trim() || p.nome;
+      p.marca = prompt('Marca:', p.marca) || p.marca;
+      p.descricao = prompt('Descrição:', p.descricao) || p.descricao;
+      const preco = prompt('Preço (R$):', p.preco);
+      if (preco !== null && !isNaN(parseFloat(preco))) p.preco = parseFloat(preco);
+      const estoque = prompt('Estoque atual (número):', p.estoque);
+      if (estoque !== null && !isNaN(parseInt(estoque))) p.estoque = parseInt(estoque);
+      salvarLS();
+      listarProdutos();
+      atualizarSelects();
+    }
+
+    function removerProduto(id) {
+      if (!confirm('Remover produto?')) return;
+      produtos = produtos.filter(p => p.id !== id);
+      // também remover entradas relacionadas e vendas/parcelas? Aqui mantemos histórico, apenas removemos o cadastro.
+      salvarLS();
+      listarProdutos();
+      atualizarSelects();
+    }
+
+    function limparCamposProduto() {
+      document.getElementById('nomeProduto').value = '';
+      document.getElementById('marcaProduto').value = '';
+      document.getElementById('descricaoProduto').value = '';
+      document.getElementById('precoProduto').value = '';
+      document.getElementById('estoqueProduto').value = '';
+    }
+
+    // ---------- CLIENTES ----------
+    function salvarCliente() {
+      const nome = document.getElementById('nomeCliente').value.trim();
+      const telefone = document.getElementById('telefoneCliente').value.trim();
+      const email = document.getElementById('emailCliente').value.trim();
+      if (!nome) { alert('Preencha o nome do cliente'); return; }
+      clientes.push({ id: gerarId('cli'), nome, telefone, email, criadoEm: new Date().toISOString() });
+      salvarLS();
+      listarClientes();
+      atualizarSelects();
+      document.getElementById('nomeCliente').value = '';
+      document.getElementById('telefoneCliente').value = '';
+      document.getElementById('emailCliente').value = '';
+      alert('Cliente cadastrado');
+    }
+
+    function listarClientes() {
+      const tbody = document.getElementById('listaClientes');
+      tbody.innerHTML = '';
+      clientes.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${escapeHtml(c.nome)}</td>
+                        <td>${escapeHtml(c.telefone)}</td>
+                        <td>${escapeHtml(c.email)}</td>
+                        <td>
+                          <button class="btn-small" onclick="editarCliente('${c.id}')">Editar</button>
+                          <button class="btn-small" onclick="removerCliente('${c.id}')">Remover</button>
+                        </td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function editarCliente(id) {
+      const c = clientes.find(x => x.id === id);
+      if (!c) return;
+      c.nome = prompt('Nome:', c.nome) || c.nome;
+      c.telefone = prompt('Telefone:', c.telefone) || c.telefone;
+      c.email = prompt('Email:', c.email) || c.email;
+      salvarLS();
+      listarClientes();
+      atualizarSelects();
+    }
+
+    function removerCliente(id) {
+      if (!confirm('Remover cliente?')) return;
+      clientes = clientes.filter(c => c.id !== id);
+      salvarLS();
+      listarClientes();
+      atualizarSelects();
+    }
+
+    // ---------- ENTRADAS ----------
+    function registrarEntrada() {
+      const produtoIndex = document.getElementById('entradaProduto').value;
+      const data = document.getElementById('entradaData').value;
+      const quantidade = parseInt(document.getElementById('entradaQuantidade').value) || 0;
+      const valor = parseFloat(document.getElementById('entradaValor').value) || 0;
+
+      if (produtoIndex === "" || quantidade <= 0 || isNaN(valor) || !data) {
+        alert('Preencha produto, data, quantidade e valor corretamente.');
+        return;
+      }
+
+      const produto = produtos[produtoIndex];
+      if (!produto) { alert('Produto inválido'); return; }
+
+      // aumenta estoque do produto
+      produto.estoque = (produto.estoque || 0) + quantidade;
+
+      const entrada = {
+        id: gerarId('ent'),
+        produtoId: produto.id,
+        produtoNome: produto.nome,
+        data,
+        quantidade,
+        valorUnitario: valor,
+        total: +(valor * quantidade)
+      };
+      entradas.push(entrada);
+      salvarLS();
+      listarEntradas();
+      listarProdutos();
+      atualizarSelects();
+      // limpar campos
+      document.getElementById('entradaQuantidade').value = '';
+      document.getElementById('entradaValor').value = '';
+      document.getElementById('entradaData').value = '';
+      alert('Entrada registrada e estoque atualizado');
+    }
+
+    function listarEntradas() {
+      const tbody = document.getElementById('listaEntradas');
+      tbody.innerHTML = '';
+      entradas.slice().reverse().forEach(e => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${new Date(e.data).toLocaleDateString()}</td>
+                        <td>${escapeHtml(e.produtoNome)}</td>
+                        <td>${e.quantidade}</td>
+                        <td>R$ ${parseFloat(e.valorUnitario).toFixed(2)}</td>
+                        <td>R$ ${parseFloat(e.total).toFixed(2)}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ---------- VENDAS ----------
+    document.getElementById('vendaForma').addEventListener('change', function(){
+      const val = this.value;
+      document.getElementById('parcelamentoArea').style.display = (val === 'parcelado') ? 'block' : 'none';
+      document.getElementById('previewParcelas').style.display = 'none';
+      document.getElementById('previewParcelas').innerHTML = '';
+    });
+
+    function gerarParcelasPreview() {
+      const num = parseInt(document.getElementById('numParcelas').value) || 0;
+      const primeira = document.getElementById('primeiraVenc').value;
+      const produtoIndex = document.getElementById('vendaProduto').value;
+      const quantidade = parseInt(document.getElementById('vendaQuantidade').value) || 0;
+
+      if (produtoIndex === "" || quantidade <= 0) { alert('Preencha produto e quantidade antes de gerar parcelas'); return; }
+      if (num < 2) { alert('Número de parcelas deve ser ao menos 2'); return; }
+      if (!primeira) { alert('Selecione a primeira data de vencimento'); return; }
+
+      const produto = produtos[produtoIndex];
+      const totalVenda = produto.preco * quantidade;
+
+      const previewDiv = document.getElementById('previewParcelas');
+      previewDiv.style.display = 'block';
+      previewDiv.innerHTML = `<strong>Total da venda: R$ ${totalVenda.toFixed(2)}</strong><div style="margin-top:8px;"></div>`;
+
+      for (let i = 1; i <= num; i++) {
+        const valorParcela = +(totalVenda / num).toFixed(2);
+        const venc = addMonths(primeira, i - 1);
+        const id = `parc_${i}`;
+        const row = document.createElement('div');
+        row.style.display = 'grid';
+        row.style.gridTemplateColumns = '1fr 1fr 1fr';
+        row.style.gap = '8px';
+        row.style.marginBottom = '6px';
+        row.innerHTML = `
+          <input class="small" type="text" value="Parcela ${i}/${num}" disabled>
+          <input class="small" type="date" id="${id}_date" value="${venc}">
+          <input class="small" type="number" id="${id}_valor" step="0.01" value="${valorParcela}">
+        `;
+        previewDiv.appendChild(row);
+      }
+
+      const btn = document.createElement('div');
+      btn.style.marginTop = '8px';
+      btn.innerHTML = `<button class="salvar" onclick="confirmarParcelasGeradas(${num})">Confirmar parcelas e salvar venda</button>`;
+      previewDiv.appendChild(btn);
+    }
+
+    function confirmarParcelasGeradas(numParcelas) {
+      registrarVenda(true, numParcelas);
+    }
+
+    function registrarVenda(fromPreview = false, numParcelasFromPreview = 0) {
+      const clienteIndex = document.getElementById('vendaCliente').value;
+      const produtoIndex = document.getElementById('vendaProduto').value;
+      const quantidade = parseInt(document.getElementById('vendaQuantidade').value) || 0;
+      const forma = document.getElementById('vendaForma').value;
+
+      if (clienteIndex === "" || produtoIndex === "" || quantidade <= 0) { alert('Preencha todos os campos corretamente'); return; }
+
+      const cliente = clientes[clienteIndex];
+      const produto = produtos[produtoIndex];
+      if (!cliente || !produto) { alert('Cliente ou produto inválido'); return; }
+      if (produto.estoque < quantidade) { alert('Estoque insuficiente'); return; }
+
+      const total = +(produto.preco * quantidade).toFixed(2);
+      const dataVenda = new Date().toISOString();
+      const vendaId = gerarId('vnd');
+
+      // diminuir estoque
+      produto.estoque -= quantidade;
+
+      // criar registro de venda
+      const vendaObj = {
+        id: vendaId,
+        clienteId: cliente.id,
+        clienteNome: cliente.nome,
+        produtoId: produto.id,
+        produtoNome: produto.nome,
+        quantidade,
+        total,
+        forma,
+        dataVenda
+      };
+      vendas.push(vendaObj);
+
+      // criar parcelas
+      if (forma === 'avista') {
+        const parcela = {
+          id: gerarId('parc'),
+          vendaId,
+          clienteId: cliente.id,
+          clienteNome: cliente.nome,
+          produtoNome: produto.nome,
+          parcelaIndex: 1,
+          totalParcelas: 1,
+          valor: total,
+          vencimento: new Date().toISOString().split('T')[0],
+          pago: true,
+          dataVenda
+        };
+        parcelas.push(parcela);
+      } else {
+        if (fromPreview) {
+          for (let i = 1; i <= numParcelasFromPreview; i++) {
+            const dateEl = document.getElementById(`parc_${i}_date`);
+            const valEl = document.getElementById(`parc_${i}_valor`);
+            const valor = parseFloat(valEl.value) || 0;
+            const venc = dateEl.value || new Date().toISOString().split('T')[0];
+            const parcObj = {
+              id: gerarId('parc'),
+              vendaId,
+              clienteId: cliente.id,
+              clienteNome: cliente.nome,
+              produtoNome: produto.nome,
+              parcelaIndex: i,
+              totalParcelas: numParcelasFromPreview,
+              valor: +valor.toFixed(2),
+              vencimento: venc,
+              pago: false,
+              dataVenda
+            };
+            parcelas.push(parcObj);
+          }
+        } else {
+          // fallback: 2 parcelas, mês atual e próximo
+          const num = 2;
+          const primeira = new Date().toISOString().split('T')[0];
+          for (let i = 1; i <= num; i++) {
+            const venc = addMonths(primeira, i - 1);
+            parcelas.push({
+              id: gerarId('parc'),
+              vendaId,
+              clienteId: cliente.id,
+              clienteNome: cliente.nome,
+              produtoNome: produto.nome,
+              parcelaIndex: i,
+              totalParcelas: num,
+              valor: +(total / num).toFixed(2),
+              vencimento: venc,
+              pago: false,
+              dataVenda
+            });
+          }
+        }
+      }
+
+      salvarLS();
+      document.getElementById('previewParcelas').style.display = 'none';
+      document.getElementById('previewParcelas').innerHTML = '';
+      document.getElementById('vendaQuantidade').value = '';
+      document.getElementById('primeiraVenc').value = '';
+      listarVendas();
+      listarProdutos();
+      listarParcelas();
+      atualizarSelects();
+      alert('Venda registrada com sucesso!');
+    }
+
+    function listarVendas() {
+      const tbody = document.getElementById('listaVendas');
+      tbody.innerHTML = '';
+      vendas.slice().reverse().forEach(v => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${new Date(v.dataVenda).toLocaleString()}</td>
+                        <td>${escapeHtml(v.clienteNome)}</td>
+                        <td>${escapeHtml(v.produtoNome)}</td>
+                        <td>${v.quantidade}</td>
+                        <td>R$ ${v.total.toFixed(2)}</td>
+                        <td>${v.forma === 'avista' ? 'À vista' : 'Parcelado'}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ---------- PARCELAS / FINANCEIRO ----------
+    function listarParcelas() {
+      const filtro = document.getElementById('filtroSituacao').value;
+      const filtroCliente = document.getElementById('filtroCliente').value;
+      const tbody = document.getElementById('listaParcelas');
+      tbody.innerHTML = '';
+
+      let lista = parcelas.slice().sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento));
+      if (filtro === 'aberto') lista = lista.filter(p => !p.pago);
+      if (filtro === 'pago') lista = lista.filter(p => p.pago);
+      if (filtroCliente) lista = lista.filter(p => p.clienteId === filtroCliente);
+
+      let saldo = 0;
+      lista.forEach(p => {
+        if (!p.pago) saldo += p.valor;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${new Date(p.vencimento).toLocaleDateString()}</td>
+                        <td>${escapeHtml(p.clienteNome)}</td>
+                        <td>${escapeHtml(p.produtoNome)}</td>
+                        <td>${p.parcelaIndex}/${p.totalParcelas}</td>
+                        <td>R$ ${p.valor.toFixed(2)}</td>
+                        <td>${p.pago ? 'Pago' : 'Em aberto'}</td>
+                        <td>
+                          ${p.pago ? '' : `<button class="btn-small" onclick="marcarPago('${p.id}')">Marcar pago</button>`}
+                          <button class="btn-small" onclick="removerParcela('${p.id}')">Remover</button>
+                        </td>`;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('saldoAberto').innerText = saldo.toFixed(2);
+      // atualizar filtro de cliente
+      const sel = document.getElementById('filtroCliente');
+      sel.innerHTML = '<option value="">Todos</option>';
+      clientes.forEach(c => sel.innerHTML += `<option value="${c.id}">${escapeHtml(c.nome)}</option>`);
+    }
+
+    function marcarPago(parcId) {
+      const p = parcelas.find(x => x.id === parcId);
+      if (!p) return;
+      const confirmar = confirm(`Marcar parcela R$ ${p.valor.toFixed(2)} de ${p.clienteNome} como paga?`);
+      if (!confirmar) return;
+      p.pago = true;
+      p.dataPagamento = new Date().toISOString();
+      salvarLS();
+      listarParcelas();
+    }
+
+    function removerParcela(parcId) {
+      if (!confirm('Remover parcela permanentemente?')) return;
+      parcelas = parcelas.filter(p => p.id !== parcId);
+      salvarLS();
+      listarParcelas();
+    }
+
+    // ---------- UTILIDADES ----------
+    function atualizarSelects() {
+      const entradaSel = document.getElementById('entradaProduto');
+      const vendaProd = document.getElementById('vendaProduto');
+      entradaSel.innerHTML = '';
+      vendaProd.innerHTML = '';
+      produtos.forEach((p, i) => {
+        entradaSel.innerHTML += `<option value="${i}">${escapeHtml(p.nome)} (Est: ${p.estoque})</option>`;
+        vendaProd.innerHTML += `<option value="${i}">${escapeHtml(p.nome)} — R$ ${p.preco.toFixed(2)} (Est: ${p.estoque})</option>`;
+      });
+
+      const vendaCli = document.getElementById('vendaCliente');
+      const filtroCli = document.getElementById('filtroCliente');
+      vendaCli.innerHTML = ''; filtroCli.innerHTML = '<option value="">Todos</option>';
+      clientes.forEach((c, i) => {
+        vendaCli.innerHTML += `<option value="${i}">${escapeHtml(c.nome)}</option>`;
+        filtroCli.innerHTML += `<option value="${c.id}">${escapeHtml(c.nome)}</option>`;
+      });
+
+      if (entradaSel.options.length === 0) entradaSel.innerHTML = '<option value="">-- sem produtos --</option>';
+      if (vendaProd.options.length === 0) vendaProd.innerHTML = '<option value="">-- sem produtos --</option>';
+      if (vendaCli.options.length === 0) vendaCli.innerHTML = '<option value="">-- sem clientes --</option>';
+    }
+
+    function salvarLS() {
+      localStorage.setItem('produtos', JSON.stringify(produtos));
+      localStorage.setItem('clientes', JSON.stringify(clientes));
+      localStorage.setItem('entradas', JSON.stringify(entradas));
+      localStorage.setItem('vendas', JSON.stringify(vendas));
+      localStorage.setItem('parcelas', JSON.stringify(parcelas));
+    }
+
+    function gerarId(prefix='id') {
+      return prefix + '_' + Math.random().toString(36).slice(2,9);
+    }
+
+    function addMonths(dateStr, months) {
+      const d = new Date(dateStr + 'T00:00:00');
+      const day = d.getDate();
+      d.setMonth(d.getMonth() + months);
+      if (d.getDate() !== day) d.setDate(0);
+      return d.toISOString().split('T')[0];
+    }
+
+    function escapeHtml(text) {
+      if (!text && text !== 0) return '';
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // inicializar UI e dados
+    listarProdutos();
+    listarClientes();
+    atualizarSelects();
+    listarEntradas();
+    listarVendas();
+    listarParcelas();
+
+    // útil para testes: descomente para pré-carregar dados
+    // if (produtos.length===0) { produtos.push({id:gerarId('prod'),nome:'Shampoo',marca:'Suri',descricao:'Shampoo pH balanceado',preco:25.00,estoque:10,criadoEm:new Date().toISOString()}); salvarLS(); atualizarSelects(); listarProdutos(); }
+  </script>
+</body>
+</html>
