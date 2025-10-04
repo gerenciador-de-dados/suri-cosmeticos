@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Suri Cosméticos — Corrigido</title>
+  <style>
+    :root{--bg:#ffe6f0;--pink:#ff99cc;--pink-2:#ffb6d1;--accent:#ff66a3}
+    *{box-sizing:border-box}
+    body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);margin:0;padding:0;color:#222}
+    header{background:var(--pink);color:white;padding:14px;text-align:center;font-weight:700}
+    nav{display:flex;gap:8px;justify-content:center;padding:12px;background:var(--pink-2)}
+    nav button{background:var(--accent);border:0;color:white;padding:8px 14px;border-radius:20px;cursor:pointer;font-weight:700}
+    nav button.active{box-shadow:0 4px 10px rgba(0,0,0,.08)}
+    main{padding:18px;max-width:980px;margin:0 auto}
+    section{display:none}
+    section.active{display:block}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    input,select{width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #cfcfcf}
+    .actions{margin-top:8px}
+    button.small{background:var(--accent);border:0;color:white;padding:6px 10px;border-radius:8px;cursor:pointer}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{border:1px solid #e0d0dd;padding:8px;text-align:center}
+    th{background:var(--pink-2)}
+    .muted{color:#666;font-size:.9em}
+    footer{padding:12px;text-align:center;color:#555}
+    /* debug */
+    #debugPanel{background:#fff;padding:10px;border-radius:6px;border:1px dashed #ccc;margin-top:12px}
+    @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header>Suri Cosméticos 💄</header>
+  <nav>
+    <button data-section="produtos" class="active">Produtos</button>
+    <button data-section="clientes">Clientes</button>
+    <button data-section="entrada">Entradas</button>
+    <button data-section="vendas">Vendas</button>
+  </nav>
+
+  <main>
+    <!-- PRODUTOS -->
+    <section id="produtos" class="active">
+      <h2>Cadastro de Produtos</h2>
+      <div class="grid">
+        <div>
+          <label>Nome do produto</label>
+          <input id="nomeProduto" placeholder="Ex: Batom Rosa" />
+          <label>Valor (R$)</label>
+          <input id="valorProduto" type="number" step="0.01" placeholder="Ex: 19.90" />
+          <label>Quantidade em estoque</label>
+          <input id="estoqueProduto" type="number" placeholder="Ex: 10" />
+          <div class="actions">
+            <button id="btnSalvarProduto" class="small">Salvar Produto</button>
+            <button id="btnLimparProdutos" class="small" style="background:#999;margin-left:8px">Limpar produtos</button>
+          </div>
+        </div>
+        <div>
+          <p class="muted">Dica: se a página não carregar, abra o Console (F12) e verifique mensagens. Há um botão de depuração no rodapé para limpar dados corrompidos.</p>
+          <h3>Lista de Produtos</h3>
+          <div style="max-height:260px;overflow:auto">
+            <table id="tabelaProdutos">
+              <thead><tr><th>Nome</th><th>Valor</th><th>Estoque</th><th>Ações</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLIENTES -->
+    <section id="clientes">
+      <h2>Cadastro de Clientes</h2>
+      <div class="grid">
+        <div>
+          <label>Nome do cliente</label>
+          <input id="nomeCliente" placeholder="Nome completo" />
+          <label>Telefone</label>
+          <input id="telefoneCliente" placeholder="(99) 99999-9999" />
+          <div class="actions">
+            <button id="btnSalvarCliente" class="small">Salvar Cliente</button>
+            <button id="btnLimparClientes" class="small" style="background:#999;margin-left:8px">Limpar clientes</button>
+          </div>
+        </div>
+        <div>
+          <h3>Lista de Clientes</h3>
+          <div style="max-height:260px;overflow:auto">
+            <table id="tabelaClientes"><thead><tr><th>Nome</th><th>Telefone</th><th>Ações</th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ENTRADAS -->
+    <section id="entrada">
+      <h2>Entrada de Produtos</h2>
+      <div class="grid">
+        <div>
+          <label>Produto</label>
+          <select id="produtoEntrada"></select>
+          <label>Quantidade</label>
+          <input id="quantidadeEntrada" type="number" />
+          <div class="actions"><button id="btnRegistrarEntrada" class="small">Registrar Entrada</button></div>
+        </div>
+        <div>
+          <h3>Histórico de Entradas</h3>
+          <div style="max-height:260px;overflow:auto">
+            <table id="tabelaEntradas"><thead><tr><th>Produto</th><th>Quantidade</th><th>Data</th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VENDAS -->
+    <section id="vendas">
+      <h2>Registro de Vendas</h2>
+      <div class="grid">
+        <div>
+          <label>Cliente</label>
+          <select id="clienteVenda"></select>
+          <label>Produto</label>
+          <select id="produtoVenda"></select>
+          <label>Quantidade</label>
+          <input id="quantidadeVenda" type="number" />
+          <label>Parcelas</label>
+          <input id="parcelasVenda" type="number" min="1" value="1" />
+          <div class="actions"><button id="btnRegistrarVenda" class="small">Registrar Venda</button></div>
+        </div>
+        <div>
+          <h3>Histórico de Vendas</h3>
+          <div style="max-height:260px;overflow:auto">
+            <table id="tabelaVendas"><thead><tr><th>Cliente</th><th>Produto</th><th>Qtd</th><th>Total (R$)</th><th>Parcelas</th><th>Data</th><th>Ações</th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Painel de debug / utilitários -->
+    <div id="debugPanel">
+      <strong>Depuração rápida</strong>
+      <div style="margin-top:8px">
+        <button id="btnResetIfCorrupt" class="small" style="background:#d9534f">Limpar dados corrompidos</button>
+        <button id="btnMostrarConsole" class="small" style="background:#666;margin-left:8px">Mostrar console (abre DevTools)</button>
+      </div>
+      <p class="muted" style="margin-top:8px">Senha padrão para exclusão/alteração: <strong>1234</strong></p>
+    </div>
+
+  </main>
+
+  <footer>Abra este arquivo como <code>index.html</code> no navegador. Se tiver problemas, envie as mensagens de erro do Console.</footer>
+
+  <script>
+    (function(){
+      'use strict';
+
+      // ------- referências DOM -------
+      const navButtons = document.querySelectorAll('nav button');
+      const sections = document.querySelectorAll('main section');
+
+      const nomeProdutoEl = document.getElementById('nomeProduto');
+      const valorProdutoEl = document.getElementById('valorProduto');
+      const estoqueProdutoEl = document.getElementById('estoqueProduto');
+      const btnSalvarProduto = document.getElementById('btnSalvarProduto');
+      const btnLimparProdutos = document.getElementById('btnLimparProdutos');
+
+      const tabelaProdutosBody = document.querySelector('#tabelaProdutos tbody');
+
+      const nomeClienteEl = document.getElementById('nomeCliente');
+      const telefoneClienteEl = document.getElementById('telefoneCliente');
+      const btnSalvarCliente = document.getElementById('btnSalvarCliente');
+      const btnLimparClientes = document.getElementById('btnLimparClientes');
+      const tabelaClientesBody = document.querySelector('#tabelaClientes tbody');
+
+      const produtoEntradaSelect = document.getElementById('produtoEntrada');
+      const quantidadeEntradaEl = document.getElementById('quantidadeEntrada');
+      const btnRegistrarEntrada = document.getElementById('btnRegistrarEntrada');
+      const tabelaEntradasBody = document.querySelector('#tabelaEntradas tbody');
+
+      const clienteVendaSelect = document.getElementById('clienteVenda');
+      const produtoVendaSelect = document.getElementById('produtoVenda');
+      const quantidadeVendaEl = document.getElementById('quantidadeVenda');
+      const parcelasVendaEl = document.getElementById('parcelasVenda');
+      const btnRegistrarVenda = document.getElementById('btnRegistrarVenda');
+      const tabelaVendasBody = document.querySelector('#tabelaVendas tbody');
+
+      const btnResetIfCorrupt = document.getElementById('btnResetIfCorrupt');
+      const btnMostrarConsole = document.getElementById('btnMostrarConsole');
+
+      // ------- dados -------
+      let produtos = [];
+      let clientes = [];
+      let entradas = [];
+      let vendas = [];
+      const senhaPadrao = '1234';
+
+      // ------- helpers -------
+      function safeLoad(key){
+        try{
+          const raw = localStorage.getItem(key);
+          if(!raw) return [];
+          return JSON.parse(raw) || [];
+        }catch(err){
+          console.warn('Erro ao ler', key, err);
+          // arquivo corrompido: remover para evitar crash
+          localStorage.removeItem(key);
+          return [];
+        }
+      }
+
+      function safeSave(key, data){
+        try{ localStorage.setItem(key, JSON.stringify(data)); }catch(e){ console.error('Erro ao salvar',key,e); }
+      }
+
+      function formatMoney(v){ return Number(v).toFixed(2).replace('.',','); }
+
+      function showSection(id){
+        sections.forEach(s=> s.classList.remove('active'));
+        navButtons.forEach(b=> b.classList.remove('active'));
+        const btn = Array.from(navButtons).find(b=> b.dataset.section === id);
+        if(btn) btn.classList.add('active');
+        const sec = document.getElementById(id);
+        if(sec) sec.classList.add('active');
+        atualizarTabelas();
+      }
+
+      function solicitarSenha(){
+        const senha = prompt('Digite a senha para confirmar:');
+        return senha === senhaPadrao;
+      }
+
+      // ------- CRUD de produtos -------
+      function salvarProduto(){
+        const nome = nomeProdutoEl.value.trim();
+        const valor = parseFloat(valorProdutoEl.value);
+        const estoque = parseInt(estoqueProdutoEl.value,10);
+        if(!nome || Number.isNaN(valor) || Number.isNaN(estoque)) return alert('Preencha todos os campos corretamente!');
+        produtos.push({nome,valor,estoque});
+        safeSave('produtos',produtos);
+        nomeProdutoEl.value = valorProdutoEl.value = estoqueProdutoEl.value = '';
+        atualizarTabelas();
+      }
+
+      function excluirProduto(index){
+        if(!solicitarSenha()) return alert('Senha incorreta!');
+        produtos.splice(index,1);
+        safeSave('produtos',produtos);
+        atualizarTabelas();
+      }
+
+      // ------- CRUD clientes -------
+      function salvarCliente(){
+        const nome = nomeClienteEl.value.trim();
+        const telefone = telefoneClienteEl.value.trim();
+        if(!nome || !telefone) return alert('Preencha todos os campos do cliente!');
+        clientes.push({nome,telefone});
+        safeSave('clientes',clientes);
+        nomeClienteEl.value = telefoneClienteEl.value = '';
+        atualizarTabelas();
+      }
+
+      function excluirCliente(index){
+        if(!solicitarSenha()) return alert('Senha incorreta!');
+        clientes.splice(index,1);
+        safeSave('clientes',clientes);
+        atualizarTabelas();
+      }
+
+      // ------- Entradas -------
+      function registrarEntrada(){
+        const produtoNome = produtoEntradaSelect.value;
+        const quantidade = parseInt(quantidadeEntradaEl.value,10);
+        if(!produtoNome || Number.isNaN(quantidade)) return alert('Preencha todos os campos de entrada!');
+        const produto = produtos.find(p=> p.nome === produtoNome);
+        if(produto) produto.estoque = (Number(produto.estoque)||0) + quantidade;
+        entradas.unshift({produto:produtoNome,quantidade,data:new Date().toLocaleString('pt-BR')});
+        safeSave('produtos',produtos);
+        safeSave('entradas',entradas);
+        quantidadeEntradaEl.value = '';
+        atualizarTabelas();
+      }
+
+      // ------- Vendas -------
+      function registrarVenda(){
+        const clienteNome = clienteVendaSelect.value;
+        const produtoNome = produtoVendaSelect.value;
+        const quantidade = parseInt(quantidadeVendaEl.value,10);
+        const parcelas = parseInt(parcelasVendaEl.value,10) || 1;
+        if(!clienteNome || !produtoNome || Number.isNaN(quantidade) || Number.isNaN(parcelas)) return alert('Preencha todos os campos de venda!');
+        const produto = produtos.find(p=> p.nome === produtoNome);
+        if(!produto) return alert('Produto não encontrado!');
+        if((Number(produto.estoque)||0) < quantidade) return alert('Estoque insuficiente!');
+        produto.estoque = Number(produto.estoque) - quantidade;
+        const total = Number(produto.valor) * quantidade;
+        vendas.unshift({cliente:clienteNome,produto:produtoNome,quantidade,total,parcelas,data:new Date().toLocaleString('pt-BR')});
+        safeSave('produtos',produtos);
+        safeSave('vendas',vendas);
+        quantidadeVendaEl.value = parcelasVendaEl.value = '';
+        atualizarTabelas();
+      }
+
+      function excluirVenda(index){
+        if(!solicitarSenha()) return alert('Senha incorreta!');
+        vendas.splice(index,1);
+        safeSave('vendas',vendas);
+        atualizarTabelas();
+      }
+
+      // ------- Atualizar UI -------
+      function atualizarTabelas(){
+        // Produtos
+        tabelaProdutosBody.innerHTML = '';
+        produtos.forEach((p,i)=>{
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${escapeHtml(p.nome)}</td><td>R$ ${formatMoney(p.valor)}</td><td>${p.estoque}</td><td><button class='small btn-del-prod' data-i='${i}'>Excluir</button></td>`;
+          tabelaProdutosBody.appendChild(tr);
+        });
+        // selects de produto
+        function populateProdutosSelect(selectEl){
+          selectEl.innerHTML = '';
+          if(produtos.length===0){ selectEl.innerHTML = '<option value="">-- sem produtos --</option>'; selectEl.disabled = true; }
+          else{ produtos.forEach(p=> selectEl.add(new Option(p.nome,p.nome))); selectEl.disabled = false; }
+        }
+        populateProdutosSelect(produtoEntradaSelect);
+        populateProdutosSelect(produtoVendaSelect);
+
+        // Clientes
+        tabelaClientesBody.innerHTML = '';
+        clientes.forEach((c,i)=>{
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${escapeHtml(c.nome)}</td><td>${escapeHtml(c.telefone)}</td><td><button class='small btn-del-cliente' data-i='${i}'>Excluir</button></td>`;
+          tabelaClientesBody.appendChild(tr);
+        });
+        // select cliente
+        clienteVendaSelect.innerHTML = '';
+        if(clientes.length===0){ clienteVendaSelect.add(new Option('-- sem clientes --','')); clienteVendaSelect.disabled = true; }
+        else{ clientes.forEach(c=> clienteVendaSelect.add(new Option(c.nome,c.nome))); clienteVendaSelect.disabled = false; }
+
+        // Entradas
+        tabelaEntradasBody.innerHTML = '';
+        entradas.forEach(e=>{
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${escapeHtml(e.produto)}</td><td>${e.quantidade}</td><td>${escapeHtml(e.data)}</td>`;
+          tabelaEntradasBody.appendChild(tr);
+        });
+
+        // Vendas
+        tabelaVendasBody.innerHTML = '';
+        vendas.forEach((v,i)=>{
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${escapeHtml(v.cliente)}</td><td>${escapeHtml(v.produto)}</td><td>${v.quantidade}</td><td>R$ ${formatMoney(v.total)}</td><td>${v.parcelas}</td><td>${escapeHtml(v.data)}</td><td><button class='small btn-del-venda' data-i='${i}'>Excluir</button></td>`;
+          tabelaVendasBody.appendChild(tr);
+        });
+      }
+
+      // ------- utilidades -------
+      function escapeHtml(str){ return String(str).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#039;"})[m]; }); }
+
+      // ------- inicialização -------
+      function init(){
+        // carregar dados (com proteção contra JSON corrompido)
+        produtos = safeLoad('produtos');
+        clientes = safeLoad('clientes');
+        entradas = safeLoad('entradas');
+        vendas = safeLoad('vendas');
+
+        // listeners nav
+        navButtons.forEach(b=> b.addEventListener('click', ()=> showSection(b.dataset.section)));
+
+        // listeners forms
+        btnSalvarProduto.addEventListener('click', salvarProduto);
+        btnLimparProdutos.addEventListener('click', ()=>{
+          if(!confirm('Confirma limpar TODOS os produtos?')) return; produtos = []; safeSave('produtos',produtos); atualizarTabelas();
+        });
+
+        btnSalvarCliente.addEventListener('click', salvarCliente);
+        btnLimparClientes.addEventListener('click', ()=>{
+          if(!confirm('Confirma limpar TODOS os clientes?')) return; clientes = []; safeSave('clientes',clientes); atualizarTabelas();
+        });
+
+        btnRegistrarEntrada.addEventListener('click', registrarEntrada);
+        btnRegistrarVenda.addEventListener('click', registrarVenda);
+
+        // delegação para botões de exclusão nas tabelas
+        document.addEventListener('click', function(e){
+          const t = e.target;
+          if(t.matches('.btn-del-prod')){ excluirProduto(Number(t.dataset.i)); }
+          if(t.matches('.btn-del-cliente')){ excluirCliente(Number(t.dataset.i)); }
+          if(t.matches('.btn-del-venda')){ excluirVenda(Number(t.dataset.i)); }
+        });
+
+        // botão limpar dados corrompidos: remove todas as chaves e recarrega arrays vazios
+        btnResetIfCorrupt.addEventListener('click', ()=>{
+          if(!confirm('Isto vai limpar TODOS os dados (produtos, clientes, vendas, entradas). Continuar?')) return;
+          ['produtos','clientes','entradas','vendas'].forEach(k=> localStorage.removeItem(k));
+          produtos = clientes = entradas = vendas = [];
+          atualizarTabelas();
+          alert('Dados limpos.');
+        });
+
+        btnMostrarConsole.addEventListener('click', ()=>{
+          alert('Abra o console do navegador com F12 / Ctrl+Shift+I e verifique a aba Console. Copie e cole aqui as mensagens de erro se precisar de ajuda.');
+        });
+
+        // mostrar seção inicial
+        showSection('produtos');
+      }
+
+      // exec init com proteção
+      try{ init(); }catch(err){
+        console.error('Erro na inicialização do app:', err);
+        alert('Ocorreu um erro ao inicializar o aplicativo. Abra o Console (F12) e envie a mensagem de erro para que eu possa ajudar.');
+      }
+
+      // tornar algumas funções disponíveis globalmente apenas para debug rápido (opcional)
+      window.SuriApp = { safeLoad, safeSave };
+    })();
+  </script>
+</body>
+</html>
