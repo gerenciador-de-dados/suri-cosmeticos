@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suri Cosméticos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #ffe6f0;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #ff99cc;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    nav {
+      display: flex;
+      justify-content: space-around;
+      background: #ffb6d9;
+      padding: 10px;
+    }
+    nav button {
+      background: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+    nav button:hover {
+      background: #ff99cc;
+      color: white;
+    }
+    section {
+      display: none;
+      padding: 20px;
+    }
+    section.active {
+      display: block;
+    }
+    input, select {
+      padding: 8px;
+      margin: 5px;
+      width: calc(100% - 20px);
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      margin-top: 5px;
+      cursor: pointer;
+    }
+    .save-btn { background: #ff66a3; color: white; }
+    .delete-btn { background: #ff3366; color: white; }
+    .edit-btn { background: #ff99cc; color: white; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background: #ffb6d9;
+    }
+  </style>
+</head>
+<body>
+  <header>Suri Cosméticos</header>
+  <nav>
+    <button onclick="showTab('produtos')">Produtos</button>
+    <button onclick="showTab('clientes')">Clientes</button>
+    <button onclick="showTab('entradas')">Entradas</button>
+    <button onclick="showTab('vendas')">Vendas</button>
+    <button onclick="showTab('relatorios')">Relatórios</button>
+  </nav>
+
+  <!-- PRODUTOS -->
+  <section id="produtos" class="active">
+    <h2>Cadastro de Produtos</h2>
+    <input id="nomeProduto" placeholder="Nome do produto">
+    <input id="valorProduto" type="number" placeholder="Valor (R$)">
+    <button class="save-btn" onclick="salvarProduto()">Salvar Produto</button>
+    <table id="tabelaProdutos">
+      <thead><tr><th>Nome</th><th>Valor (R$)</th><th>Ações</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- CLIENTES -->
+  <section id="clientes">
+    <h2>Cadastro de Clientes</h2>
+    <input id="nomeCliente" placeholder="Nome do cliente">
+    <input id="telefoneCliente" placeholder="Telefone">
+    <button class="save-btn" onclick="salvarCliente()">Salvar Cliente</button>
+    <table id="tabelaClientes">
+      <thead><tr><th>Nome</th><th>Telefone</th><th>Ações</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- ENTRADAS -->
+  <section id="entradas">
+    <h2>Lançar Entrada de Produtos</h2>
+    <select id="produtoEntrada"></select>
+    <input id="quantidadeEntrada" type="number" placeholder="Quantidade">
+    <button class="save-btn" onclick="salvarEntrada()">Registrar Entrada</button>
+    <table id="tabelaEntradas">
+      <thead><tr><th>Produto</th><th>Quantidade</th><th>Data</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- VENDAS -->
+  <section id="vendas">
+    <h2>Registrar Venda</h2>
+    <select id="clienteVenda"></select>
+    <select id="produtoVenda"></select>
+    <input id="quantidadeVenda" type="number" placeholder="Quantidade">
+    <input id="parcelasVenda" type="number" placeholder="Parcelas">
+    <button class="save-btn" onclick="salvarVenda()">Registrar Venda</button>
+    <table id="tabelaVendas">
+      <thead>
+        <tr><th>Cliente</th><th>Produto</th><th>Qtd</th><th>Total (R$)</th><th>Parcelas</th><th>Data</th><th>Ações</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- RELATÓRIOS -->
+  <section id="relatorios">
+    <h2>Relatórios</h2>
+    <div id="resumoRelatorio"></div>
+  </section>
+
+  <script>
+    // ================== VARIÁVEIS GLOBAIS ==================
+    let produtos = JSON.parse(localStorage.getItem('produtos') || '[]');
+    let clientes = JSON.parse(localStorage.getItem('clientes') || '[]');
+    let entradas = JSON.parse(localStorage.getItem('entradas') || '[]');
+    let vendas = JSON.parse(localStorage.getItem('vendas') || '[]');
+    const senhaPadrao = "1234";
+
+    // ================== TROCAR ABAS ==================
+    function showTab(id) {
+      document.querySelectorAll("section").forEach(sec => sec.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      atualizarTabelas();
+    }
+
+    // ================== PRODUTOS ==================
+    function salvarProduto() {
+      const nome = nomeProduto.value.trim();
+      const valor = parseFloat(valorProduto.value);
+      if (!nome || !valor) return alert("Preencha todos os campos!");
+      produtos.push({ nome, valor });
+      localStorage.setItem('produtos', JSON.stringify(produtos));
+      nomeProduto.value = "";
+      valorProduto.value = "";
+      atualizarTabelas();
+    }
+
+    function excluirProduto(i) {
+      if (prompt("Digite a senha para excluir:") !== senhaPadrao) return alert("Senha incorreta!");
+      produtos.splice(i, 1);
+      localStorage.setItem('produtos', JSON.stringify(produtos));
+      atualizarTabelas();
+    }
+
+    // ================== CLIENTES ==================
+    function salvarCliente() {
+      const nome = nomeCliente.value.trim();
+      const telefone = telefoneCliente.value.trim();
+      if (!nome || !telefone) return alert("Preencha todos os campos!");
+      clientes.push({ nome, telefone });
+      localStorage.setItem('clientes', JSON.stringify(clientes));
+      nomeCliente.value = "";
+      telefoneCliente.value = "";
+      atualizarTabelas();
+    }
+
+    function excluirCliente(i) {
+      if (prompt("Digite a senha para excluir:") !== senhaPadrao) return alert("Senha incorreta!");
+      clientes.splice(i, 1);
+      localStorage.setItem('clientes', JSON.stringify(clientes));
+      atualizarTabelas();
+    }
+
+    // ================== ENTRADAS ==================
+    function salvarEntrada() {
+      const produto = produtoEntrada.value;
+      const qtd = parseInt(quantidadeEntrada.value);
+      if (!produto || !qtd) return alert("Preencha todos os campos!");
+      entradas.push({ produto, qtd, data: new Date().toLocaleString("pt-BR") });
+      localStorage.setItem('entradas', JSON.stringify(entradas));
+      quantidadeEntrada.value = "";
+      atualizarTabelas();
+    }
+
+    // ================== VENDAS ==================
+    function salvarVenda() {
+      const cliente = clienteVenda.value;
+      const produto = produtoVenda.value;
+      const qtd = parseInt(quantidadeVenda.value);
+      const parcelas = parseInt(parcelasVenda.value) || 1;
+      const prod = produtos.find(p => p.nome === produto);
+      if (!cliente || !produto || !qtd || !prod) return alert("Preencha todos os campos!");
+      const total = (prod.valor * qtd).toFixed(2);
+      vendas.push({ cliente, produto, qtd, total, parcelas, data: new Date().toLocaleString("pt-BR") });
+      localStorage.setItem('vendas', JSON.stringify(vendas));
+      quantidadeVenda.value = "";
+      parcelasVenda.value = "";
+      atualizarTabelas();
+    }
+
+    function excluirVenda(i) {
+      if (prompt("Digite a senha para excluir:") !== senhaPadrao) return alert("Senha incorreta!");
+      vendas.splice(i, 1);
+      localStorage.setItem('vendas', JSON.stringify(vendas));
+      atualizarTabelas();
+    }
+
+    // ================== ATUALIZAÇÃO DAS TABELAS ==================
+    function atualizarTabelas() {
+      const tabProdutos = document.querySelector("#tabelaProdutos tbody");
+      const tabClientes = document.querySelector("#tabelaClientes tbody");
+      const tabEntradas = document.querySelector("#tabelaEntradas tbody");
+      const tabVendas = document.querySelector("#tabelaVendas tbody");
+      const selProdEntrada = document.getElementById("produtoEntrada");
+      const selProdVenda = document.getElementById("produtoVenda");
+      const selCliVenda = document.getElementById("clienteVenda");
+
+      tabProdutos.innerHTML = produtos.map((p,i)=>`
+        <tr><td>${p.nome}</td><td>${p.valor.toFixed(2)}</td>
+        <td><button class='delete-btn' onclick='excluirProduto(${i})'>Excluir</button></td></tr>`).join("");
+
+      tabClientes.innerHTML = clientes.map((c,i)=>`
+        <tr><td>${c.nome}</td><td>${c.telefone}</td>
+        <td><button class='delete-btn' onclick='excluirCliente(${i})'>Excluir</button></td></tr>`).join("");
+
+      tabEntradas.innerHTML = entradas.map(e=>`
+        <tr><td>${e.produto}</td><td>${e.qtd}</td><td>${e.data}</td></tr>`).join("");
+
+      tabVendas.innerHTML = vendas.map((v,i)=>`
+        <tr><td>${v.cliente}</td><td>${v.produto}</td><td>${v.qtd}</td>
+        <td>${v.total}</td><td>${v.parcelas}</td><td>${v.data}</td>
+        <td><button class='delete-btn' onclick='excluirVenda(${i})'>Excluir</button></td></tr>`).join("");
+
+      selProdEntrada.innerHTML = produtos.map(p=>`<option>${p.nome}</option>`).join("");
+      selProdVenda.innerHTML = produtos.map(p=>`<option>${p.nome}</option>`).join("");
+      selCliVenda.innerHTML = clientes.map(c=>`<option>${c.nome}</option>`).join("");
+
+      // Relatório
+      const totalVendas = vendas.reduce((sum,v)=>sum+parseFloat(v.total),0);
+      document.getElementById("resumoRelatorio").innerHTML =
+        `<h3>Total de vendas: R$ ${totalVendas.toFixed(2)}</h3>
+         <p>Quantidade de produtos cadastrados: ${produtos.length}</p>
+         <p>Clientes cadastrados: ${clientes.length}</p>`;
+    }
+
+    atualizarTabelas();
+  </script>
+</body>
+</html>
