@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suri Cosméticos — Sistema</title>
+<style>
+body { font-family: Arial,sans-serif; background:#f3f3f3; color:#222; margin:0; }
+header{ background:#d32f2f; color:#fff; padding:12px 18px; font-size:20px; font-weight:700; }
+nav{ display:flex; background:#b71c1c; }
+nav button{ flex:1; padding:10px; border:0; background:none; color:#fff; cursor:pointer; font-weight:700; }
+nav button.active{ background:#e53935; }
+section{ padding:16px; display:none; }
+section.active{ display:block; }
+.row{ display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+input, select{ padding:6px 8px; border:1px solid #ccc; border-radius:4px; }
+table{ width:100%; border-collapse:collapse; margin-top:10px; }
+th,td{ border:1px solid #ddd; padding:8px; text-align:left; }
+th{ background:#f0f0f0; }
+.btn{ padding:6px 8px; border-radius:5px; border:0; cursor:pointer; }
+.btn-edit{ background:#fbc02d; color:#000; }
+.btn-delete{ background:#e53935; color:#fff; }
+.btn-paid{ background:#43a047; color:#fff; font-weight:700; }
+.btn-open{ background:#f57c00; color:#fff; font-weight:700; }
+.filter-btn{ padding:6px 8px; margin-right:6px; border-radius:5px; border:0; cursor:pointer; }
+.controls { margin-top:8px; }
+.small { font-size:13px; padding:4px 6px; }
+strong { color:#000; }
+</style>
+</head>
+<body>
+<header>Suri Cosméticos</header>
+
+<nav>
+  <button class="tab-btn active" data-tab="produtos">Produtos</button>
+  <button class="tab-btn" data-tab="entrada">Entrada</button>
+  <button class="tab-btn" data-tab="venda">Venda</button>
+  <button class="tab-btn" data-tab="clientes">Clientes</button>
+</nav>
+
+<!-- PRODUTOS -->
+<section id="produtos" class="active">
+  <h2>Produtos</h2>
+  <div class="row">
+    <input id="produtoNome" placeholder="Nome do produto" />
+    <input id="produtoValor" type="number" step="0.01" placeholder="Valor unitário" />
+    <button id="addProduto" class="btn">Adicionar Produto</button>
+  </div>
+  <div class="controls">
+    <button class="filter-btn small" onclick="updateProdutosView()">Atualizar Página</button>
+    <button class="filter-btn small" onclick="exportPDF('produtosTable','Produtos')">Exportar PDF</button>
+  </div>
+  <table id="produtosTable">
+    <thead>
+      <tr><th>Produto</th><th>Valor</th><th>Saldo</th><th>Ações</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+<!-- ENTRADA -->
+<section id="entrada">
+  <h2>Entradas</h2>
+  <div class="row">
+    <select id="entradaProduto"></select>
+    <input id="entradaQuantidade" type="number" placeholder="Quantidade" />
+    <input id="entradaNota" placeholder="Nota fiscal" />
+    <input id="entradaData" type="date" />
+    <button id="addEntrada" class="btn">Adicionar Entrada</button>
+  </div>
+  <div class="controls">
+    <button class="filter-btn small" onclick="updateEntradasView()">Atualizar Página</button>
+    <button class="filter-btn small" onclick="exportPDF('entradaTable','Entradas')">Exportar PDF</button>
+  </div>
+  <table id="entradaTable">
+    <thead>
+      <tr><th>Produto</th><th>Quantidade</th><th>Nota</th><th>Data</th><th>Ações</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+<!-- VENDA -->
+<section id="venda">
+  <h2>Vendas</h2>
+  <div class="row">
+    <select id="vendaCliente"></select>
+    <select id="vendaProduto"></select>
+    <input id="vendaQuantidade" type="number" placeholder="Quantidade" />
+    <input id="vendaParcelas" type="number" min="1" value="1" placeholder="Parcelas" />
+    <input id="vendaData" type="date" />
+    <button id="addVenda" class="btn">Registrar Venda</button>
+  </div>
+  <div class="controls">
+    <button class="filter-btn small" onclick="filterVendas('Pago')">Pago</button>
+    <button class="filter-btn small" onclick="filterVendas('Em Aberto')">Em Aberto</button>
+    <button class="filter-btn small" onclick="filterVendas('Todos')">Todos</button>
+    <button class="filter-btn small" onclick="updateVendasView()">Atualizar Página</button>
+    <button class="filter-btn small" onclick="exportPDF('vendaTable','Vendas')">Exportar PDF</button>
+  </div>
+  <table id="vendaTable">
+    <thead>
+      <tr>
+        <th>Cliente</th><th>Produto</th><th>Qtd</th>
+        <th>Parcelas</th><th>Data</th><th>Valor Parcela</th><th>Vencimentos</th>
+        <th>Status</th><th>Ações</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+<!-- CLIENTES -->
+<section id="clientes">
+  <h2>Clientes</h2>
+  <div class="row">
+    <input id="clienteNome" placeholder="Nome do cliente" />
+    <input id="clienteTelefone" placeholder="Telefone" />
+    <button id="addCliente" class="btn">Adicionar Cliente</button>
+  </div>
+  <div class="controls">
+    <button class="filter-btn small" onclick="updateClientesView()">Atualizar Página</button>
+    <button class="filter-btn small" onclick="exportPDF('clientesTable','Clientes')">Exportar PDF</button>
+  </div>
+  <table id="clientesTable">
+    <thead>
+      <tr><th>Cliente</th><th>Telefone</th><th>Ações</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script>
+window.onload=function(){
+const senha='1234';
+let produtos=JSON.parse(localStorage.getItem('produtos')||'[]');
+let entradas=JSON.parse(localStorage.getItem('entradas')||'[]');
+let vendas=JSON.parse(localStorage.getItem('vendas')||'[]');
+let clientes=JSON.parse(localStorage.getItem('clientes')||'[]');
+const $=s=>document.querySelector(s);
+const $$=s=>Array.from(document.querySelectorAll(s));
+
+/* Navegação */
+$$('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    $$('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    $$('section').forEach(s=>s.classList.remove('active'));
+    $('#'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* Salvar localStorage */
+function saveAll(){ 
+  localStorage.setItem('produtos',JSON.stringify(produtos));
+  localStorage.setItem('clientes',JSON.stringify(clientes));
+  localStorage.setItem('entradas',JSON.stringify(entradas));
+  localStorage.setItem('vendas',JSON.stringify(vendas));
+}
+
+/* Atualizar views */
+function updateProdutosView(){
+  const tbody=$('#produtosTable tbody'); tbody.innerHTML='';
+  $('#entradaProduto').innerHTML=''; $('#vendaProduto').innerHTML='';
+  produtos.forEach((p,i)=>{
+    const saldo=entradas.filter(e=>e.produto===p.nome).reduce((a,b)=>a+b.quantidade,0)
+               -vendas.filter(v=>v.produto===p.nome).reduce((a,b)=>a+b.quantidade,0);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${p.nome}</td><td>${p.valor.toFixed(2)}</td><td>${saldo}</td>
+      <td>
+        <button class="btn btn-edit small" onclick="editarProduto(${i})">Alterar</button>
+        <button class="btn btn-delete small" onclick="excluirProduto(${i})">Excluir</button>
+      </td>`;
+    tbody.appendChild(tr);
+    const opt1=document.createElement('option'); opt1.value=p.nome; opt1.text=p.nome; $('#entradaProduto').add(opt1);
+    const opt2=document.createElement('option'); opt2.value=p.nome; opt2.text=p.nome; $('#vendaProduto').add(opt2);
+  });
+}
+
+function updateClientesView(){
+  const tbody=$('#clientesTable tbody'); tbody.innerHTML=''; $('#vendaCliente').innerHTML='';
+  clientes.forEach((c,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${c.nome}</td><td>${c.telefone}</td>
+      <td>
+        <button class="btn btn-edit small" onclick="editarCliente(${i})">Alterar</button>
+        <button class="btn btn-delete small" onclick="excluirCliente(${i})">Excluir</button>
+      </td>`;
+    tbody.appendChild(tr);
+    const opt=document.createElement('option'); opt.value=c.nome; opt.text=c.nome; $('#vendaCliente').add(opt);
+  });
+}
+
+function updateEntradasView(){
+  const tbody=$('#entradaTable tbody'); tbody.innerHTML='';
+  entradas.forEach((e,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${e.produto}</td><td>${e.quantidade}</td><td>${e.nota}</td><td>${e.data}</td>
+      <td>
+        <button class="btn btn-edit small" onclick="editarEntrada(${i})">Alterar</button>
+        <button class="btn btn-delete small" onclick="excluirEntrada(${i})">Excluir</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  updateProdutosView();
+  saveAll();
+}
+
+function updateVendasView(filter='Todos'){
+  const tbody=$('#vendaTable tbody'); tbody.innerHTML='';
+  vendas.forEach((v,i)=>{
+    if(filter!=='Todos' && v.status!==filter) return;
+    const statusClass=v.status==='Pago'?'btn-paid':'btn-open';
+    let vencResumo='';
+    if(v.vencimentos.length<=2) vencResumo=v.vencimentos.join(', ');
+    else vencResumo=`${v.vencimentos[0]} … ${v.vencimentos[v.vencimentos.length-1]} (total ${v.vencimentos.length})`;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${v.cliente}</td><td>${v.produto}</td><td>${v.quantidade}</td>
+      <td>${v.parcelas}</td><td>${v.data}</td><td><strong>${v.valorParcela.toFixed(2)}</strong></td>
+      <td>${vencResumo}</td>
+      <td><button class="btn ${statusClass} small" onclick="toggleStatus(${i})">${v.status}</button></td>
+      <td>
+        <button class="btn btn-edit small" onclick="editarVenda(${i})">Alterar</button>
+        <button class="btn btn-delete small" onclick="excluirVenda(${i})">Excluir</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  updateProdutosView();
+  saveAll();
+}
+
+function filterVendas(status){ updateVendasView(status); }
+
+/* Adicionar funções */
+$('#addProduto').addEventListener('click', ()=>{
+  const nome=$('#produtoNome').value.trim(); const valor=parseFloat($('#produtoValor').value);
+  if(!nome||isNaN(valor)){alert('Informe nome e valor'); return;}
+  produtos.push({nome,valor}); $('#produtoNome').value=''; $('#produtoValor').value='';
+  updateProdutosView(); saveAll();
+});
+
+$('#addCliente').addEventListener('click', ()=>{
+  const nome=$('#clienteNome').value.trim(); const tel=$('#clienteTelefone').value.trim();
+  if(!nome||!tel){alert('Informe nome e telefone'); return;}
+  clientes.push({nome,tel}); $('#clienteNome').value=''; $('#clienteTelefone').value='';
+  updateClientesView(); saveAll();
+});
+
+$('#addEntrada').addEventListener('click', ()=>{
+  const produto=$('#entradaProduto').value; const qtd=parseInt($('#entradaQuantidade').value);
+  const nota=$('#entradaNota').value; const data=$('#entradaData').value;
+  if(!produto||isNaN(qtd)||!data){alert('Preencha todos os campos'); return;}
+  entradas.push({produto,quantidade:qtd,nota,data});
+  $('#entradaQuantidade').value=''; $('#entradaNota').value=''; $('#entradaData').value='';
+  updateEntradasView();
+});
+
+$('#addVenda').addEventListener('click', ()=>{
+  const cliente=$('#vendaCliente').value;
+  const produto=$('#vendaProduto').value;
+  const qtd=parseInt($('#vendaQuantidade').value);
+  const parcelas=parseInt($('#vendaParcelas').value);
+  const data=$('#vendaData').value;
+  if(!cliente||!produto||isNaN(qtd)||isNaN(parcelas)||!data){alert('Preencha todos os campos'); return;}
+  const produtoObj = produtos.find(p => p.nome === produto);
+  if(!produtoObj){alert('Produto não encontrado'); return;}
+  const valorTotal = produtoObj.valor*qtd;
+  const valorParcela = parseFloat((valorTotal/parcelas).toFixed(2));
+  let vencimentos=[];
+  let dataVenda=new Date(data);
+  for(let i=0;i<parcelas;i++){let d=new Date(dataVenda.getFullYear(),dataVenda.getMonth()+i,dataVenda.getDate()); vencimentos.push(d.toISOString().slice(0,10));}
+  vendas.push({cliente,produto,quantidade:qtd,parcelas,valorTotal,valorParcela,vencimentos,data,status:'Em Aberto'});
+  $('#vendaQuantidade').value=''; $('#vendaParcelas').value='1'; $('#vendaData').value='';
+  updateVendasView('Todos'); saveAll();
+});
+
+/* Editar/Excluir funções com senha */
+window.editarProduto=function(i){ if(prompt('Senha para alterar:')!==senha){alert('Senha incorreta'); return;}
+  const p=produtos[i]; const n=prompt('Novo nome:',p.nome); const v=parseFloat(prompt('Novo valor:',p.valor));
+  if(!n||isNaN(v)){alert('Alteração cancelada'); return;}
+  produtos[i]={nome:n,valor:v}; updateProdutosView(); updateEntradasView(); updateVendasView(); saveAll();
+};
+window.excluirProduto=function(i){ if(prompt('Senha para excluir:')!==senha){alert('Senha incorreta'); return;}
+  produtos.splice(i,1); updateProdutosView(); updateEntradasView(); updateVendasView(); saveAll();
+};
+
+window.editarCliente=function(i){ if(prompt('Senha para alterar:')!==senha){alert('Senha incorreta'); return;}
+  const c=clientes[i]; const n=prompt('Nome:',c.nome); const t=prompt('Telefone:',c.telefone);
+  if(!n||!t){alert('Alteração cancelada'); return;} clientes[i]={nome:n,telefone:t};
+  updateClientesView(); updateVendasView(); saveAll();
+};
+window.excluirCliente=function(i){ if(prompt('Senha para excluir:')!==senha){alert('Senha incorreta'); return;}
+  clientes.splice(i,1); updateClientesView(); updateVendasView(); saveAll();
+};
+
+window.editarEntrada=function(i){ if(prompt('Senha para alterar:')!==senha){alert('Senha incorreta'); return;}
+  const e=entradas[i]; const q=parseInt(prompt('Quantidade:',e.quantidade));
+  const n=prompt('Nota:',e.nota); const d=prompt('Data:',e.data);
+  if(isNaN(q)||!n||!d){alert('Alteração cancelada'); return;} entradas[i]={produto:e.produto,quantidade:q,nota:n,data:d};
+  updateEntradasView(); saveAll();
+};
+window.excluirEntrada=function(i){ if(prompt('Senha para excluir:')!==senha){alert('Senha incorreta'); return;}
+  entradas.splice(i,1); updateEntradasView(); saveAll();
+};
+
+window.editarVenda=function(i){ if(prompt('Senha para alterar:')!==senha){alert('Senha incorreta'); return;}
+  const v=vendas[i]; const q=parseInt(prompt('Quantidade:',v.quantidade));
+  const p=parseInt(prompt('Parcelas:',v.parcelas)); const d=prompt('Data:',v.data);
+  if(isNaN(q)||isNaN(p)||!d){alert('Alteração cancelada'); return;}
+  const valorTotal = v.valorParcela*q;
+  let vencimentos=[];
+  let dataVenda = new Date(d);
+  for(let j=0;j<p;j++){let dt=new Date(dataVenda.getFullYear(),dataVenda.getMonth()+j,dataVenda.getDate()); vencimentos.push(dt.toISOString().slice(0,10));}
+  vendas[i]={...v,quantidade:q,parcelas:p,valorTotal,valorParcela:v.valorParcela,vencimentos,data:d};
+  updateVendasView(); saveAll();
+};
+window.excluirVenda=function(i){ if(prompt('Senha para excluir:')!==senha){alert('Senha incorreta'); return;}
+  vendas.splice(i,1); updateVendasView(); saveAll();
+};
+window.toggleStatus=function(i){ if(prompt('Senha para alterar status:')!==senha){alert('Senha incorreta'); return;}
+  vendas[i].status=vendas[i].status==='Pago'?'Em Aberto':'Pago'; updateVendasView(); saveAll();
+};
+
+/* Exportar PDF */
+window.exportPDF=function(tableId,title){
+  const { jsPDF }=window.jspdf;
+  const doc=new jsPDF();
+  doc.text(title,14,14);
+  doc.autoTable({ html:'#'+tableId, startY:20 });
+  doc.save(title+'.pdf');
+};
+
+/* Inicialização */
+updateProdutosView(); updateClientesView(); updateEntradasView(); updateVendasView();
+};
+</script>
+</body>
+</html>
