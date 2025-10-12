@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suri Cosméticos</title>
+<style>
+body { margin:0; font-family:"Poppins",sans-serif; background:linear-gradient(135deg,#f9c5d1,#c9a0dc); color:#333;}
+#splashScreen { display:flex; justify-content:center; align-items:center; height:100vh; flex-direction:column; background:linear-gradient(135deg,#f9c5d1,#c9a0dc); animation:fadeOut 1s ease 2s forwards;}
+#splashScreen h1 { color:white; font-size:36px; font-weight:bold; text-shadow:0 0 20px rgba(255,255,255,0.7); animation:pulse 1.5s infinite;}
+@keyframes pulse {0%,100%{opacity:1}50%{opacity:0.6}}
+@keyframes fadeOut {to{opacity:0; visibility:hidden; display:none}}
+#loginScreen { display:none; justify-content:center; align-items:center; height:100vh; }
+.login-box { background:rgba(255,255,255,0.9); padding:40px; border-radius:20px; box-shadow:0 0 20px rgba(0,0,0,0.2); text-align:center; width:300px; }
+.login-box h1 { color:#b30059; margin-bottom:20px; font-weight:bold; font-size:24px;}
+.login-box input { width:100%; padding:10px; margin:8px 0; border-radius:8px; border:1px solid #ccc;}
+.login-box button { width:100%; padding:10px; background-color:#b30059; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;}
+.login-box button:hover{background-color:#a00050;}
+#errorLogin{color:red; font-size:14px; display:none; margin-top:8px;}
+#mainScreen{display:none; padding:20px; background-color:#f5f5f5; min-height:100vh;}
+h2{color:#b30059;}
+.tabs{display:flex; margin-bottom:10px;}
+.tab{flex:1; padding:12px; text-align:center; background-color:#e0e0e0; cursor:pointer; border-radius:10px 10px 0 0; font-weight:bold;}
+.tab.active{background-color:#b30059;color:white;}
+.content{display:none; background-color:white; border-radius:0 0 10px 10px; padding:20px; box-shadow:0 0 8px rgba(0,0,0,0.1);}
+.content.active{display:block;}
+input,select,textarea{margin:5px; padding:8px; border-radius:5px; border:1px solid #aaa;}
+button{margin:5px; padding:8px 12px; border-radius:5px; border:none; cursor:pointer; font-weight:bold;}
+button:hover{opacity:0.9;}
+.btn-rosa{background-color:#b30059; color:white;}
+table{width:100%; border-collapse:collapse; margin-top:10px;}
+th,td{border:1px solid #ccc; padding:8px; text-align:center;}
+th{background-color:#f2f2f2;}
+.logout{float:right; background-color:#b30059; color:white; padding:8px 14px; border-radius:8px; cursor:pointer;}
+.status-btn{padding:5px 10px; border-radius:5px; border:none; cursor:pointer; font-weight:bold;}
+.status-pago{background-color:#4CAF50; color:white;}
+.status-aberto{background-color:#f44336; color:white;}
+.search-box input, .filter-box select, .filter-box input{padding:6px; border-radius:5px; border:1px solid #aaa; margin-right:5px;}
+</style>
+</head>
+<body>
+
+<!-- Splash Screen -->
+<div id="splashScreen"><h1>Suri Cosméticos</h1></div>
+
+<!-- Login Screen -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h1>Suri Cosméticos</h1>
+    <input type="text" id="loginUser" placeholder="Usuário">
+    <input type="password" id="loginPass" placeholder="Senha">
+    <button onclick="login()">Entrar no sistema</button>
+    <div id="errorLogin">Usuário ou senha incorretos!</div>
+  </div>
+</div>
+
+<!-- Main Screen -->
+<div id="mainScreen">
+  <div>
+    <span class="logout" onclick="logout()">Sair</span>
+    <h2>💄 Painel Suri Cosméticos</h2>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab(0)">Produtos</div>
+    <div class="tab" onclick="showTab(1)">Entradas</div>
+    <div class="tab" onclick="showTab(2)">Vendas</div>
+    <div class="tab" onclick="showTab(3)">Relatórios</div>
+  </div>
+
+  <!-- Produtos -->
+  <div class="content active" id="produtos">
+    <h3>Cadastro de Produtos</h3>
+    <input id="produtoNome" placeholder="Nome do produto">
+    <input id="produtoValor" type="number" placeholder="Valor">
+    <button class="btn-rosa" onclick="addProduto()">Adicionar</button>
+    <div class="search-box">
+      <input type="text" placeholder="Pesquisar produtos..." oninput="filtroProdutos(this.value)">
+    </div>
+    <table id="tabelaProdutos">
+      <tr><th>Produto</th><th>Valor</th><th>Saldo</th><th>Ações</th></tr>
+    </table>
+  </div>
+
+  <!-- Entradas -->
+  <div class="content" id="entradas">
+    <h3>Entradas de Estoque</h3>
+    <input id="entradaProduto" placeholder="Produto">
+    <input id="entradaQtd" type="number" placeholder="Quantidade">
+    <input id="entradaNota" placeholder="Nota Fiscal">
+    <button class="btn-rosa" onclick="addEntrada()">Registrar Entrada</button>
+    <div class="search-box">
+      <input type="text" placeholder="Pesquisar entradas..." oninput="filtroEntradas(this.value)">
+    </div>
+    <table id="tabelaEntradas">
+      <tr><th>Produto</th><th>Qtd</th><th>Nota Fiscal</th></tr>
+    </table>
+  </div>
+
+  <!-- Vendas -->
+  <div class="content" id="vendas">
+    <h3>Registro de Vendas</h3>
+    <input id="vendaProduto" placeholder="Produto">
+    <input id="vendaQtd" type="number" placeholder="Qtd">
+    <input id="vendaCliente" placeholder="Cliente">
+    <input id="vendaData" type="date">
+    <select id="vendaStatus">
+      <option value="Pago">Pago</option>
+      <option value="Em Aberto">Em Aberto</option>
+    </select>
+    <button class="btn-rosa" onclick="addVenda()">Registrar Venda</button>
+
+    <!-- Filtro Avançado -->
+    <div class="filter-box">
+      <select id="filtroStatus" onchange="filtrarVendasAvancado()">
+        <option value="Todos">Todos</option>
+        <option value="Pago">Pago</option>
+        <option value="Em Aberto">Em Aberto</option>
+      </select>
+      <input type="date" id="filtroDataInicio" onchange="filtrarVendasAvancado()">
+      <input type="date" id="filtroDataFim" onchange="filtrarVendasAvancado()">
+      <input type="text" placeholder="Pesquisar vendas..." oninput="filtrarVendasAvancado()">
+    </div>
+
+    <table id="tabelaVendas">
+      <tr><th>Produto</th><th>Qtd</th><th>Cliente</th><th>Data</th><th>Status</th></tr>
+    </table>
+  </div>
+
+  <!-- Relatórios -->
+  <div class="content" id="relatorios">
+    <h3>Relatórios Gerais</h3>
+    <div id="relatorioConteudo"></div>
+    <button class="btn-rosa" onclick="gerarRelatorio()">Atualizar Relatório</button>
+    <button class="btn-rosa" onclick="exportarPDF()">Exportar PDF</button>
+  </div>
+</div>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+let usuarioAtual=null,nivelAcesso=null,produtos=[],vendas=[],entradas=[];
+
+// Splash & Login
+window.addEventListener("load",()=>{setTimeout(()=>{document.getElementById("splashScreen").style.display="none"; document.getElementById("loginScreen").style.display="flex";},2000);});
+function login(){const user=document.getElementById('loginUser').value.trim(); const pass=document.getElementById('loginPass').value.trim(); const error=document.getElementById('errorLogin'); if((user==="admin"&&pass==="1234")||(user==="user"&&pass==="0000")){usuarioAtual=user; nivelAcesso=(user==="admin")?"admin":"user"; localStorage.setItem("usuarioAtual",usuarioAtual); localStorage.setItem("nivelAcesso",nivelAcesso); document.getElementById('loginScreen').style.display="none"; document.getElementById('mainScreen').style.display="block";} else{error.style.display="block";}}
+function logout(){localStorage.clear(); location.reload();}
+window.onload=function(){const user=localStorage.getItem("usuarioAtual"); if(user){usuarioAtual=user;nivelAcesso=localStorage.getItem("nivelAcesso");document.getElementById('splashScreen').style.display="none";document.getElementById('loginScreen').style.display="none";document.getElementById('mainScreen').style.display="block";}};
+
+function showTab(i){document.querySelectorAll(".tab").forEach((t,idx)=>t.classList.toggle("active",idx===i));document.querySelectorAll(".content").forEach((c,idx)=>c.classList.toggle("active",idx===i));}
+
+// Produtos
+function addProduto(){const nome=document.getElementById("produtoNome").value;const valor=parseFloat(document.getElementById("produtoValor").value);if(!nome||!valor)return alert("Preencha todos os campos.");produtos.push({nome,valor,saldo:0});atualizarTabelaProdutos();}
+function atualizarTabelaProdutos(){const tabela=document.getElementById("tabelaProdutos");tabela.innerHTML="<tr><th>Produto</th><th>Valor</th><th>Saldo</th><th>Ações</th></tr>";produtos.forEach((p,i)=>{tabela.insertRow().innerHTML=`<td>${p.nome}</td><td>R$ ${p.valor.toFixed(2)}</td><td>${p.saldo}</td><td>${nivelAcesso==='admin'?`<button onclick="produtos.splice(${i},1); atualizarTabelaProdutos()">Excluir</button>`:'-'}</td>`;});}
+function filtroProdutos(txt){const tabela=document.getElementById("tabelaProdutos");for(let i=1;i<tabela.rows.length;i++){let row=tabela.rows[i]; row.style.display=row.cells[0].innerText.toLowerCase().includes(txt.toLowerCase())?"":"none";}}
+
+// Entradas
+function addEntrada(){const prod=document.getElementById("entradaProduto").value; const qtd=parseInt(document.getElementById("entradaQtd").value); const nota=document.getElementById("entradaNota").value; if(!prod||!qtd)return alert("Preencha os campos obrigatórios."); entradas.push({prod,qtd,nota}); const p=produtos.find(pr=>pr.nome===prod); if(p)p.saldo+=qtd; const tabela=document.getElementById("tabelaEntradas"); tabela.insertRow().innerHTML=`<td>${prod}</td><td>${qtd}</td><td>${nota}</td>`; atualizarTabelaProdutos();}
+function filtroEntradas(txt){const tabela=document.getElementById("tabelaEntradas");for(let i=1;i<tabela.rows.length;i++){let row=tabela.rows[i]; row.style.display=(row.cells[0].innerText+row.cells[2].innerText).toLowerCase().includes(txt.toLowerCase())?"":"none";}}
+
+// Vendas
+function addVenda(){const prod=document.getElementById("vendaProduto").value; const qtd=parseInt(document.getElementById("vendaQtd").value); const cli=document.getElementById("vendaCliente").value; const data=document.getElementById("vendaData").value; const status=document.getElementById("vendaStatus").value; if(!prod||!qtd||!cli) return alert("Preencha todos os campos obrigatórios."); const p=produtos.find(pr=>pr.nome===prod); if(p && status==='Pago'){if(p.saldo<qtd) return alert("Estoque insuficiente!"); p.saldo-=qtd; atualizarTabelaProdutos();} vendas.push({prod,qtd,cli,data,status}); atualizarTabelaVendas();}
+function atualizarTabelaVendas(){const tabela=document.getElementById("tabelaVendas");tabela.innerHTML="<tr><th>Produto</th><th>Qtd</th><th>Cliente</th><th>Data</th><th>Status</th></tr>";vendas.forEach(v=>{tabela.insertRow().innerHTML=`<td>${v.prod}</td><td>${v.qtd}</td><td>${v.cli}</td><td>${v.data}</td><td><button class="status-btn ${v.status==='Pago'?'status-pago':'status-aberto'}" onclick="toggleStatus(this)">${v.status}</button></td>`;});}
+function toggleStatus(btn){const tr=btn.parentElement.parentElement; const prod=tr.cells[0].innerText; const qtd=parseInt(tr.cells[1].innerText); const venda=vendas.find(v=>v.prod===prod&&v.qtd===qtd&&v.cli===tr.cells[2].innerText&&v.data===tr.cells[3].innerText); const p=produtos.find(pr=>pr.nome===prod); if(venda.status==='Pago'){venda.status='Em Aberto';btn.className='status-btn status-aberto';btn.innerText='Em Aberto';if(p)p.saldo+=qtd;}else{venda.status='Pago';btn.className='status-btn status-pago';btn.innerText='Pago';if(p){if(p.saldo<qtd){alert("Estoque insuficiente!");venda.status='Em Aberto';btn.className='status-btn status-aberto';btn.innerText='Em Aberto';return;}p.saldo-=qtd;}} atualizarTabelaProdutos();}
+
+// Filtro Avançado Vendas
+function filtrarVendasAvancado(){const tabela=document.getElementById("tabelaVendas");const status=document.getElementById("filtroStatus").value; const inicio=document.getElementById("filtroDataInicio").value; const fim=document.getElementById("filtroDataFim").value; const txt=document.querySelector("#vendas .filter-box input[type=text]").value.toLowerCase(); for(let i=1;i<tabela.rows.length;i++){let row=tabela.rows[i]; let show=true; if(status!=="Todos" && row.cells[4].innerText!==status) show=false; if(inicio && row.cells[3].innerText<inicio) show=false; if(fim && row.cells[3].innerText>fim) show=false; if(txt && !(row.cells[0].innerText+row.cells[2].innerText).toLowerCase().includes(txt)) show=false; row.style.display=show?"":"none";}}
+
+// Relatórios
+function gerarRelatorio(){let rel="<h4>Saldo Atual de Produtos:</h4><ul>"; produtos.forEach(p=> rel+=`<li>${p.nome}: ${p.saldo} unidades</li>`); rel+="</ul><h4>Vendas Registradas:</h4><ul>"; vendas.forEach(v=> rel+=`<li>${v.data} - ${v.prod} - ${v.qtd} unidades - ${v.cli} - ${v.status}</li>`); rel+="</ul>"; document.getElementById("relatorioConteudo").innerHTML=rel;}
+
+// Exportar PDF
+function exportarPDF(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFontSize(16);
+  doc.text("Relatório Suri Cosméticos", 14, 20);
+  let y = 30;
+  doc.setFontSize(12);
+  doc.text("Produtos:", 14, y);
+  y+=6;
+  produtos.forEach(p => {
+    doc.text(`${p.nome} - Saldo: ${p.saldo} unidades - Valor: R$ ${p.valor.toFixed(2)}`, 14, y);
+    y+=6;
+  });
+  y+=4;
+  doc.text("Vendas:", 14, y);
+  y+=6;
+  vendas.forEach(v=>{
+    doc.text(`${v.data} - ${v.prod} - Qtd: ${v.qtd} - Cliente: ${v.cli} - Status: ${v.status}`,14,y);
+    y+=6;
+  });
+  doc.save("relatorio_suri.pdf");
+}
+</script>
+
+</body>
+</html>
