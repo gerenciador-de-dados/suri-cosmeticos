@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suri Cosméticos</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Tela de Login -->
+<div id="loginScreen">
+  <h1>Suri Cosméticos</h1>
+  <div class="login-box">
+    <input type="text" id="username" placeholder="Usuário">
+    <input type="password" id="password" placeholder="Senha">
+    <button onclick="login()">Entrar</button>
+  </div>
+</div>
+
+<!-- Sistema Principal -->
+<div id="mainApp" style="display:none;">
+  <nav>
+    <button onclick="showTab('produtos')">Produtos</button>
+    <button onclick="showTab('entrada')">Entrada</button>
+    <button onclick="showTab('vendas')">Vendas</button>
+    <button onclick="showTab('relatorios')">Relatórios</button>
+  </nav>
+
+  <div id="content">
+    <!-- Abas -->
+    <div id="produtos" class="tab" style="display:none;">
+      <h2>Produtos</h2>
+      <input type="text" id="novoProdutoNome" placeholder="Nome do produto">
+      <button onclick="adicionarProduto()">Adicionar Produto</button>
+      <table id="tabelaProdutos">
+        <thead><tr><th>Produto</th><th>Saldo</th><th>Ações</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div id="entrada" class="tab" style="display:none;">
+      <h2>Entrada de Produtos</h2>
+      <select id="entradaProduto"></select>
+      <input type="number" id="entradaQuantidade" placeholder="Quantidade">
+      <input type="text" id="entradaNota" placeholder="Nota Fiscal">
+      <input type="date" id="entradaData">
+      <button onclick="registrarEntrada()">Registrar Entrada</button>
+      <table id="tabelaEntradas">
+        <thead><tr><th>Produto</th><th>Quantidade</th><th>Nota</th><th>Data</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div id="vendas" class="tab" style="display:none;">
+      <h2>Vendas</h2>
+      <select id="vendaProduto"></select>
+      <input type="text" id="vendaCliente" placeholder="Cliente">
+      <input type="number" id="vendaQuantidade" placeholder="Quantidade">
+      <input type="date" id="vendaData">
+      <select id="vendaStatus">
+        <option value="em aberto">Em Aberto</option>
+        <option value="pago">Pago</option>
+      </select>
+      <button onclick="registrarVenda()">Registrar Venda</button>
+      <table id="tabelaVendas">
+        <thead><tr><th>Produto</th><th>Cliente</th><th>Qtd</th><th>Data</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div id="relatorios" class="tab" style="display:none;">
+      <h2>Relatórios</h2>
+      <button onclick="exportarPDF('produtos')">Exportar Produtos PDF</button>
+      <button onclick="exportarPDF('entradas')">Exportar Entradas PDF</button>
+      <button onclick="exportarPDF('vendas')">Exportar Vendas PDF</button>
+      <button onclick="backupDados()">Backup</button>
+      <button onclick="restaurarDados()">Restaurar Backup</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>
